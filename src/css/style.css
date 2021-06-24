@@ -1,0 +1,138 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.chaos_organizer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+.chaos_organizer h2 {
+    margin: 0;
+}
+
+.chaos_container {
+    width: 70%;
+    height: 100%;
+    display: flex;
+    border:2px solid darkslategray;
+    border-radius: 0.5em;
+    box-sizing: border-box;
+}
+
+.chaos_main {
+    position: relative;
+    padding-bottom: 100px;
+    background-color: rgb(235, 255, 251);
+    background-image: url('../img/back.png');
+    border-top-left-radius: 0.5em;
+    border-bottom-left-radius: 0.5em;
+    flex: 3;
+    border-right: 1px solid darkslategray;
+}
+
+.chaos_side {
+    background-color: #aee4e6;
+    background: linear-gradient(45deg, #aee4e6, #bcebd9);
+    flex: 1;
+    border-top-right-radius: 0.5em;
+    border-bottom-right-radius: 0.5em;
+}
+
+.chaos_form_container {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+}
+
+.chaos_form {
+    width: 85%;
+    box-sizing: border-box;
+    padding: 10px 15px;
+    margin: 0 auto;
+    border-radius: 0.5em;
+    background-color: #ffffff;
+}
+
+.chaos_form_input {
+    width: 90%;
+    border: 0;
+    padding: 10px 5px;
+    font-size: 1.2em;
+}
+
+.chaos_form_input:focus {
+    outline: 0;
+}
+
+.chaos_messages {
+    display: flex;
+    height: 100%;
+    box-sizing: border-box;
+    flex-direction: column;
+    align-items: flex-end;
+    padding: 20px 30px 10px 30px;
+    overflow: auto;
+}
+
+.chaos_messages_message {
+    position: relative;
+    margin-bottom: 20px;
+    padding: 15px 15px 25px 15px;
+    min-width: 10%;
+    max-width: 60%;
+    background-color: rgb(176, 255, 212);
+    background: linear-gradient(to bottom, #fdfcd2, #fcf6d7);
+    border-radius: 0.5em;
+}
+
+.chaos_message_date {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    font-size: 0.8em;
+    background-color: #3d7d7d;
+    color: #ffffff;
+    text-align: right;
+    padding-right: 1em;
+    border-bottom-left-radius: 0.5em;
+    border-bottom-right-radius: 0.5em;
+}
+
+.chaos_side_header {
+    width: 100%;
+    background-color: #3d7d7d;
+    background: linear-gradient(45deg, #3d7d7d, #289b6f);
+    border-top-right-radius: 0.5em;
+    padding: 10px 15px;
+    box-sizing: border-box;
+    color: #ffffff;
+}
+
+.chaos_side_list {
+    list-style: none;
+    margin: 0;
+    padding: 20px 40px;
+}
+
+.chaos_side_item {
+    background-color: #ffffff;
+    border-radius: 0.5em;
+    margin-bottom: 20px;
+    padding: 10px 15px;
+    font-size: 1.2em;
+    cursor: pointer;
+}
+
+.chaos_side_item span {
+    font-weight: bold;
+}
