@@ -2,7 +2,14 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+h1.title {
+    font-size: 24px;
+    max-width: 10%;
+    overflow-wrap: break-word;
+}
+
 .chaos_organizer {
+    min-width: 700px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -127,7 +134,7 @@ body {
 .chaos_side_item {
     background-color: #ffffff;
     border-radius: 0.5em;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     padding: 10px 15px;
     font-size: 1.2em;
     cursor: pointer;
