@@ -8,8 +8,10 @@ h1.title {
     overflow-wrap: break-word;
 }
 
+/* ОБЩИЕ СТИЛИ */
+
 .chaos_organizer {
-    min-width: 700px;
+    min-width: 900px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -22,15 +24,20 @@ h1.title {
     font-size: 16px;
 }
 
-.chaos_organizer h2 {
+.chaos_organizer h2, h3 {
     margin: 0;
 }
 
+.chaos_organizer a {
+    color: #009999;
+}
+
 .chaos_container {
+    position: relative;
     width: 70%;
     height: 100%;
     display: flex;
-    border:2px solid darkslategray;
+    border: 2px solid darkslategray;
     border-radius: 0.5em;
     box-sizing: border-box;
 }
@@ -46,13 +53,28 @@ h1.title {
     border-right: 1px solid darkslategray;
 }
 
-.chaos_side {
-    background-color: #aee4e6;
-    background: linear-gradient(45deg, #aee4e6, #bcebd9);
-    flex: 1;
-    border-top-right-radius: 0.5em;
-    border-bottom-right-radius: 0.5em;
+/* ОШИБКИ */
+
+.chaos_connection_error {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: #ffffff;
+    opacity: 0.8;
 }
+
+.chaos_connection_error::after {
+    content: 'Ошибка. Проверьте соединение с сервером.';
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* ФОРМА СООБЩЕНИЯ */
 
 .chaos_form_container {
     position: absolute;
@@ -61,6 +83,7 @@ h1.title {
 }
 
 .chaos_form {
+    position: relative;
     width: 85%;
     box-sizing: border-box;
     padding: 10px 15px;
@@ -74,11 +97,201 @@ h1.title {
     border: 0;
     padding: 10px 5px;
     font-size: 1.2em;
+    border-radius: 0.5em;
 }
 
 .chaos_form_input:focus {
     outline: 0;
 }
+
+.chaos_file_label {
+    display: flex;
+    align-items: baseline
+}
+
+.chaos_file_input {
+    width: 180px;
+    padding: 8px 5px;
+    margin-right: 15px;
+    font-size: 1.2em;
+    background-color: #679B00;
+    background: linear-gradient(45deg, #679B00, #86B32D);
+    box-shadow: 0px 4px 4px 0px #436400;
+    border-radius: 0.5em;
+    text-align: center;
+}
+
+.chaos_file_input:hover {
+    background: #86B32D;
+}
+
+.chaos_file_hidden {
+    display: none;
+}
+
+.chaos_file_button_container {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    right: 70px;
+    top: 0;
+    bottom: 0;
+}
+
+.chaos_file_button {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background-color: #679B00;
+    background: no-repeat center/18px url('../img/icons/arrow.png'), #679B00;
+    box-shadow: 0px -4px 4px 0px #436400;
+    transform: rotate(180deg);
+}
+
+.chaos_file_button:hover {
+    background-color: #86B32D;
+    background: no-repeat center/18px url('../img/icons/arrow.png'), #86B32D;
+}
+
+.chaos_dropplace_container {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff;
+    opacity: 0.8;
+    visibility: hidden;
+    z-index: 100;
+}
+
+.chaos_dropplace {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    margin: 10px;
+    border: 2px dashed #006363;
+}
+
+.chaos_dropplace::after {
+    content: 'Кидай файл сюда';
+    font-size: 1.2em;
+}
+
+.chaos_form_invalid {
+    background-color: #FF7373;
+    border: 2px solid darkred;
+    animation: invalid 150ms ease-in-out;
+}
+
+@keyframes invalid {
+    0% {
+        transform: translateX(3px);
+    }
+    25% {
+        transform: translateY(-5px);
+    }
+    50% {
+        transform: translateY(2px);
+    }
+    75% {
+        transform: translateX(-5px);
+    }
+    100% {
+        transform: translateX(2px);
+    }
+}
+
+/* ФОРМА СООБЩЕНИЯ - МЕНЮ ФАЙЛОВ */
+
+.chaos_form_clip {
+    position: absolute;
+    width: 28px;
+    right: 20px;
+    margin: 8px 0px;
+    top: 0;
+    bottom: 0;
+    background: no-repeat center/contain url('../img/icons/clip.png');
+    cursor: pointer;
+}
+
+.chaos_add_container {
+    display: none;
+    position: absolute;
+    background-color: #ffffff;
+    border-radius: 0.5em;
+    right: -20px;
+    bottom: 60px;
+}
+
+.chaos_add_container_visible {
+    display: block;
+}
+
+.chaos_add_list {
+    list-style: none;
+    margin: 10px 0px;
+    padding: 0;
+    width: 100%;
+}
+
+.chaos_add_item {
+    position: relative;
+    padding: 5px 15px 5px 35px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.chaos_add_item:hover {
+    background-color: #5CCCCC;
+}
+
+.chaos_add_images::before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    left: 10px;
+    top: 8px;
+    background: no-repeat center/contain url('../img/icons/image.png');
+}
+
+.chaos_add_media::before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    left: 10px;
+    top: 8px;
+    background: no-repeat center/contain url('../img/icons/media.png');
+}
+
+.chaos_add_files::before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    left: 10px;
+    top: 8px;
+    background: no-repeat center/contain url('../img/icons/file.png');
+}
+
+.chaos_add_geo::before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    left: 10px;
+    top: 8px;
+    background: no-repeat center/contain url('../img/icons/geo.png');
+}
+
+/* ОКНО СООБЩЕНИЙ */
 
 .chaos_messages {
     display: flex;
@@ -101,13 +314,17 @@ h1.title {
     border-radius: 0.5em;
 }
 
+.chaos_message_body {
+    word-break: break-word;
+}
+
 .chaos_message_date {
     position: absolute;
     left: 0;
     right: 0;
     bottom: 0;
     font-size: 0.8em;
-    background-color: #3d7d7d;
+    background-color: #5c8a01;
     color: #ffffff;
     text-align: right;
     padding-right: 1em;
@@ -115,14 +332,76 @@ h1.title {
     border-bottom-right-radius: 0.5em;
 }
 
+/* ОКНО СООБЩЕНИЙ - ВЫБРАННОЕ СООБЩЕНИЕ */
+
+.chaos_select_container {
+    align-items: center;
+}
+
+.chaos_select_header {
+    position: relative;
+    width: 85%;
+    box-sizing: border-box;
+    padding: 10px 15px;
+    margin-bottom: 40px;
+    border-radius: 0.5em;
+    background-color: #006363;
+    background: linear-gradient(45deg, #006363, #1D7373, #006363);
+    color: #ffffff;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+}
+
+.chaos_select_close {
+    position: absolute;
+    top: 0;
+    right: 40px;
+    line-height: 35px;
+    font-size: 40px;
+    cursor: pointer;
+    font-weight: normal;
+}
+
+/* БОКОВОЕ ОКНО */
+
+.chaos_side {
+    background-color: #006363;
+    background: linear-gradient(225deg, #006363, #1D7373);
+    flex: 1;
+    border-top-right-radius: 0.5em;
+    border-bottom-right-radius: 0.5em;
+}
+
 .chaos_side_header {
     width: 100%;
-    background-color: #3d7d7d;
-    background: linear-gradient(45deg, #3d7d7d, #289b6f);
-    border-top-right-radius: 0.5em;
-    padding: 10px 15px;
+    background-color: #86B32D;
+    background: linear-gradient(45deg, #5c8a01, #86B32D, #5c8a01);
+    border-top-right-radius: 0.3em;
+    padding: 10px 40px;
     box-sizing: border-box;
     color: #ffffff;
+}
+
+.chaos_side_subhead {
+    position: relative;
+    background-color: #C9F76F;
+    background: linear-gradient(225deg, #C9F76F, #B9F73E);
+    padding: 8px 40px;
+    color: #013838;
+}
+
+.chaos_side_close {
+    position: absolute;
+    top: 0;
+    right: 40px;
+    line-height: 30px;
+    font-size: 40px;
+    cursor: pointer;
+}
+
+.chaos_select_close::after, .chaos_side_close::after {
+    content: '×';
 }
 
 .chaos_side_list {
@@ -132,14 +411,89 @@ h1.title {
 }
 
 .chaos_side_item {
+    position: relative;
+    width: 255px;
+    box-sizing: border-box;
     background-color: #ffffff;
     border-radius: 0.5em;
     margin-bottom: 10px;
-    padding: 10px 15px;
+    padding: 7px 15px 7px 45px;
     font-size: 1.2em;
+    word-break: break-word;
     cursor: pointer;
+}
+
+.chaos_side_item:hover {
+    background-color: #86B32D;
+    color: #ffffff;
 }
 
 .chaos_side_item span {
     font-weight: bold;
+}
+
+.chaos_side_links::before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    left: 15px;
+    top: 12px;
+    background: no-repeat center/contain url('../img/icons/link.png');
+}
+
+.chaos_side_files::before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    left: 15px;
+    top: 12px;
+    background: no-repeat center/contain url('../img/icons/file.png');
+}
+
+.chaos_side_images::before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    left: 15px;
+    top: 12px;
+    background: no-repeat center/contain url('../img/icons/image.png');
+}
+
+.chaos_side_videos::before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    left: 15px;
+    top: 12px;
+    background: no-repeat center/contain url('../img/icons/video.png');
+}
+
+.chaos_side_favourites::before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    left: 15px;
+    top: 12px;
+    background: no-repeat center/contain url('../img/icons/favourite.png');
+}
+
+.chaos_side_select {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chaos_side_select::before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    left: 15px;
+    top: 12px;
+    background: no-repeat center/contain url('../img/icons/arrow.png');
 }
