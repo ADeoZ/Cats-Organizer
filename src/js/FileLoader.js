@@ -1,7 +1,7 @@
 import DOM from './DOM';
 
 export default class FileLoader {
-  constructor(element, request) {
+  constructor(element, requestClass) {
     // Собираем элементы
     this.parentElement = element;
     this.formElement = this.parentElement.querySelector('.chaos_form');
@@ -10,43 +10,56 @@ export default class FileLoader {
     this.buttonElement = this.formElement.querySelector('.chaos_file_button');
     this.dropplace = this.parentElement.querySelector('.chaos_dropplace');
 
+    // Заводим вспомогательные классы
+    this.request = requestClass;
+
     // Привязываем контекст
     this.openForm = this.openForm.bind(this);
     this.closeForm = this.closeForm.bind(this);
     this.showDropPlace = this.showDropPlace.bind(this);
     this.hideDropPlace = this.hideDropPlace.bind(this);
-    this.dropFile = this.dropFile.bind(this);
+    this.loadFile = this.loadFile.bind(this);
   }
 
-
+  // Открываем форму прикрепления файла
   openForm() {
     this.addFormElement = DOM.getAddForm();
     this.inputElement.replaceWith(this.addFormElement);
-
+    this.inputFileElement = this.addFormElement.querySelector('input.chaos_file_hidden');
     this.dropplace = DOM.createDropPlace();
     this.mainElement.prepend(this.dropplace);
-    this.mainElement.addEventListener('dragover', this.showDropPlace); // убирать на drop
+    this.mainElement.addEventListener('dragover', this.showDropPlace);
     this.dropplace.addEventListener('dragleave', this.hideDropPlace);
-    this.dropplace.addEventListener('drop', this.dropFile);
+    this.dropplace.addEventListener('drop', this.loadFile);
+    this.inputFileElement.addEventListener('change', this.loadFile);
   }
 
+  // Закрываем форму
   closeForm() {
     this.addFormElement.replaceWith(this.inputElement);
   }
 
+  // Отображаем область Drag and Drop
   showDropPlace(event) {
     event.preventDefault();
     this.dropplace.style.visibility = 'visible';
   }
 
+  // Скрываем область Drag and Drop
   hideDropPlace() {
     this.dropplace.style.visibility = 'hidden';
   }
 
-  dropFile(event) {
+  // Отправляем файл
+  loadFile(event) {
     event.preventDefault();
     this.hideDropPlace();
+    this.mainElement.removeEventListener('dragover', this.showDropPlace);
     this.closeForm();
-    console.log(event.dataTransfer.files[0]);
+
+    const file = this.inputFileElement.files[0] || event.dataTransfer.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+    this.request.sendFile(formData);
   }
 }

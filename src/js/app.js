@@ -1,6 +1,6 @@
 import Chaos from './Chaos';
 
-const chat = new Chaos(document.querySelector('.chaos_organizer'), 'ws://localhost:7070');
+const chat = new Chaos(document.querySelector('.chaos_organizer'), 'localhost:7070');
 chat.init();
 
 // const file = document.querySelector('.chaos_form_input');

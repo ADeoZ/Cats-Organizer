@@ -116,7 +116,7 @@ export default class Chaos {
 
   // Добавляем отправленное сообщение в конец
   addMessage(text, date) {
-    const messageElement = this.createMessageElement(text, date);
+    const messageElement = DOM.createMessageElement(text, date);
     this.messagesElement.append(messageElement);
 
     this.messagesElement.scrollTop = this.messagesElement.scrollHeight
