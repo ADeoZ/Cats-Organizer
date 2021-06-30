@@ -14,27 +14,39 @@ export default class FileLoader {
     this.openForm = this.openForm.bind(this);
     this.closeForm = this.closeForm.bind(this);
     this.showDropPlace = this.showDropPlace.bind(this);
+    this.hideDropPlace = this.hideDropPlace.bind(this);
+    this.dropFile = this.dropFile.bind(this);
   }
+
 
   openForm() {
     this.addFormElement = DOM.getAddForm();
-    this.addButtonElement = DOM.getAddButton();
     this.inputElement.replaceWith(this.addFormElement);
-    this.addFormElement.after(this.addButtonElement);
-    this.buttonElement = this.formElement.querySelector('.chaos_file_button');
-    this.buttonElement.addEventListener('click', this.closeForm);
 
     this.dropplace = DOM.createDropPlace();
     this.mainElement.prepend(this.dropplace);
-    this.mainElement.addEventListener('dragover', this.showDropPlace);
+    this.mainElement.addEventListener('dragover', this.showDropPlace); // убирать на drop
+    this.dropplace.addEventListener('dragleave', this.hideDropPlace);
+    this.dropplace.addEventListener('drop', this.dropFile);
   }
 
   closeForm() {
     this.addFormElement.replaceWith(this.inputElement);
-    this.buttonElement.remove();
   }
 
-  showDropPlace() {
+  showDropPlace(event) {
+    event.preventDefault();
     this.dropplace.style.visibility = 'visible';
+  }
+
+  hideDropPlace() {
+    this.dropplace.style.visibility = 'hidden';
+  }
+
+  dropFile(event) {
+    event.preventDefault();
+    this.hideDropPlace();
+    this.closeForm();
+    console.log(event.dataTransfer.files[0]);
   }
 }

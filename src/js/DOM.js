@@ -98,21 +98,20 @@ export default class DOM {
     addFormElement.classList.add('chaos_file_label');
     addFormElement.innerHTML = `
       <div class="chaos_file_input">Кликни или Кинь</div>
-      <div class="chaos_file_name">Файл не выбран</div>
       <input type="file" class="chaos_file_hidden">`;
     return addFormElement;
   }
 
-  // Создаём кнопку отправки файла
-  static getAddButton() {
-    const sendButtonContainerElement = document.createElement('div');
-    sendButtonContainerElement.classList.add('chaos_file_button_container');
-    const sendButtonElement = document.createElement('button');
-    sendButtonElement.classList.add('chaos_file_button');
-    sendButtonElement.type = 'button';
-    sendButtonContainerElement.append(sendButtonElement);
-    return sendButtonContainerElement;
-  }
+  // // Создаём кнопку отправки файла
+  // static getAddButton() {
+  //   const sendButtonContainerElement = document.createElement('div');
+  //   sendButtonContainerElement.classList.add('chaos_file_button_container');
+  //   const sendButtonElement = document.createElement('button');
+  //   sendButtonElement.classList.add('chaos_file_button');
+  //   sendButtonElement.type = 'button';
+  //   sendButtonContainerElement.append(sendButtonElement);
+  //   return sendButtonContainerElement;
+  // }
 
   // Создаём область сброса файла для Drag and Drop
   static createDropPlace() {
