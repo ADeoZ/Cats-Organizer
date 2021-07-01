@@ -20,6 +20,30 @@ export default class DOM {
     return messageElement;
   }
 
+  // Создаём элемент сообщения с изображением в ленту
+  static createImageElement(url, fileName, date) {
+    const messageElement = document.createElement('div');
+    messageElement.classList.add('chaos_messages_message');
+    const imageElement = document.createElement('img');
+    imageElement.src = `${url}/${fileName}`;
+    imageElement.classList.add('chaos_messages_image');
+    const messageTextElement = document.createElement('div');
+    messageTextElement.classList.add('chaos_message_body');
+    const messageDateElement = document.createElement('div');
+    messageDateElement.classList.add('chaos_message_date');
+    const dateFormat = new Intl.DateTimeFormat('ru', {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    messageDateElement.innerText = dateFormat.format(date);
+    messageTextElement.append(imageElement);
+    messageElement.append(messageTextElement, messageDateElement);
+    return messageElement;
+  }
+
   // Создаём контейнер выбранного сообщения
   static createSelectContainer(text, date) {
     const selectContainerElement = document.createElement('div');
@@ -98,7 +122,7 @@ export default class DOM {
     addFormElement.classList.add('chaos_file_label');
     addFormElement.innerHTML = `
       <div class="chaos_file_input">Кликни или Кинь</div>
-      <input type="file" class="chaos_file_hidden">`;
+      <input type="file" class="chaos_file_hidden" accept="image/jpeg,image/png,image/gif,image/heic,image/heif,image/webp">`;
     return addFormElement;
   }
 

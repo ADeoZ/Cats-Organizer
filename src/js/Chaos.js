@@ -27,6 +27,7 @@ export default class Chaos {
     this.removeError = this.removeError.bind(this);
     this.connectionError = this.connectionError.bind(this);
     this.addMessage = this.addMessage.bind(this);
+    this.addFile = this.addFile.bind(this);
     this.renderMessages = this.renderMessages.bind(this);
     this.lazyLoad = this.lazyLoad.bind(this);
     this.showMessage = this.showMessage.bind(this);
@@ -39,6 +40,7 @@ export default class Chaos {
       error: this.connectionError,
       load: this.renderMessages,
       message: this.addMessage,
+      file: this.addFile,
       sideLoad: this.sidePanel.render,
       sideCategory: this.sidePanel.showCategoryItems,
       showMessage: this.showMessage,
@@ -55,7 +57,23 @@ export default class Chaos {
   renderMessages(data, position) {
     console.log(data);
     for (const message of data) {
-      const messageElement = DOM.createMessageElement(message.message, message.date);
+      let messageElement = '';
+      switch (message.type) {
+        case 'text': {
+          messageElement = DOM.createMessageElement(message.message, message.date);
+          break;
+        }
+        case 'image': {
+          messageElement = DOM.createImageElement(this.server, message.message, message.date);
+          break;
+        }
+        case 'video': {
+          break;
+        }
+        default: {
+          return;
+        }
+      }
       this.messagesElement.prepend(messageElement);
     }
 
@@ -123,6 +141,25 @@ export default class Chaos {
     - this.messagesElement.getBoundingClientRect().height;
 
     this.inputElement.value = '';
+  }
+
+  // Добавляем отправленный файл в конец
+  addFile(type, fileName, date) {
+    switch (type) {
+      case 'image': {
+        const messageElement = DOM.createImageElement(this.server, fileName, date);
+        this.messagesElement.append(messageElement);
+        break;
+      }
+      case 'video': {
+        break;
+      }
+      default: {
+        return;
+      }
+    }
+    this.messagesElement.scrollTop = this.messagesElement.scrollHeight
+    - this.messagesElement.getBoundingClientRect().height;
   }
 
   // Ошибка пустого сообщения

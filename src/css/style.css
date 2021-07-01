@@ -335,6 +335,10 @@ h1.title {
     border-bottom-right-radius: 0.5em;
 }
 
+.chaos_messages_image {
+    max-width: 100%;
+}
+
 /* ОКНО СООБЩЕНИЙ - ВЫБРАННОЕ СООБЩЕНИЕ */
 
 .chaos_select_container {

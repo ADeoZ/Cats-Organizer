@@ -1,7 +1,7 @@
 export default class Request {
   constructor(server) {
-    this.server = `http://${server}`;
-    this.wsServer = `ws://${server}`;
+    this.server = server;
+    this.wsServer = this.server.replace(/^http/i, 'ws');
     this.data = { event: 'load' };
     this.callbacks = {
       error: () => { throw Error('Ошибка соединения'); },
@@ -19,28 +19,26 @@ export default class Request {
     this.ws.addEventListener('message', (event) => {
       const data = JSON.parse(event.data);
       // Ответ с базой сообщений
-      if (data.type === 'database') {
+      if (data.event === 'database') {
         this.callbacks.load(data.dB, data.position);
         this.callbacks.sideLoad(data.side);
       }
       // Успешная отправка текстового сообщения
-      if (data.type === 'text') {
+      if (data.event === 'text') {
         this.callbacks.message(data.message, data.date);
         this.callbacks.sideLoad(data.side);
       }
       // Успешная отправка файла
-      if (data.type === 'file') {
-        console.log(data.link);
-        const img = document.createElement('img');
-        img.src = `${this.server}/${data.link}`;
-        document.querySelector('.chaos_messages').append(img);
+      if (data.event === 'file') {
+        this.callbacks.file(data.type, data.message, data.date);
+        this.callbacks.sideLoad(data.side);
       }
       // Ответ с базой по категории хранилища
-      if (data.type === 'storage') {
+      if (data.event === 'storage') {
         this.callbacks.sideCategory(data);
       }
       // Ответ с запрошенным сообщением
-      if (data.type === 'select') {
+      if (data.event === 'select') {
         this.callbacks.showMessage(data.message);
       }
     });
@@ -60,7 +58,7 @@ export default class Request {
 
   sendFile(formData) {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', this.server);
+    xhr.open('POST', `${this.server}/upload`);
     xhr.send(formData);
   }
 }
