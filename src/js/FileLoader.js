@@ -26,7 +26,7 @@ export default class FileLoader {
   openForm() {
     const ifFormOpen = this.formElement.querySelector('.chaos_file_label');
     if (ifFormOpen) {
-      return
+      return;
     }
     this.closeElement = DOM.getCloseForm();
     this.formElement.prepend(this.closeElement);
