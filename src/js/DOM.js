@@ -1,11 +1,14 @@
 export default class DOM {
-  // Создаём элемент сообщения ленты
-  static createMessageElement(text, date) {
+  // Основной шаблон для всех сообщений в ленту
+  static createMessageContainer(bodyElement, date) {
     const messageElement = document.createElement('div');
     messageElement.classList.add('chaos_messages_message');
+    const messageHeaderElement = document.createElement('div');
+    messageHeaderElement.classList.add('chaos_message_header');
+    const messageHeaderToolsElement = document.createElement('div');
+    messageHeaderToolsElement.classList.add('chaos_message_tools');
     const messageTextElement = document.createElement('div');
     messageTextElement.classList.add('chaos_message_body');
-    messageTextElement.innerHTML = this.linkify(text);
     const messageDateElement = document.createElement('div');
     messageDateElement.classList.add('chaos_message_date');
     const dateFormat = new Intl.DateTimeFormat('ru', {
@@ -16,36 +19,75 @@ export default class DOM {
       minute: '2-digit',
     });
     messageDateElement.innerText = dateFormat.format(date);
-    messageElement.append(messageTextElement, messageDateElement);
+    messageHeaderElement.append(messageHeaderToolsElement);
+    messageTextElement.append(bodyElement);
+    messageElement.append(messageHeaderElement, messageTextElement, messageDateElement);
     return messageElement;
   }
 
-  // Создаём элемент сообщения с изображением в ленту
+  static createToolsElements() {
+    const toolsElements = document.createElement('div');
+    toolsElements.classList.add('chaos_message_tools_container');
+    const deleteElement = document.createElement('div');
+    deleteElement.classList.add('chaos_message_tools_delete');
+    const pinElement = document.createElement('div');
+    pinElement.classList.add('chaos_message_tools_pin');
+    const favouriteElement = document.createElement('div');
+    favouriteElement.classList.add('chaos_message_tools_favourite');
+    toolsElements.append(deleteElement, pinElement, favouriteElement);
+    return toolsElements;
+  }
+
+  // Элемент текстового сообщения ленты
+  static createMessageElement(text, date) {
+    const textElement = document.createElement('p');
+    textElement.innerHTML = this.linkify(text);
+    return DOM.createMessageContainer(textElement, date);
+  }
+
+  // Элемент сообщения с изображением в ленту
   static createImageElement(url, fileName, date) {
-    const messageElement = document.createElement('div');
-    messageElement.classList.add('chaos_messages_message');
     const imageElement = document.createElement('img');
     imageElement.src = `${url}/${fileName}`;
     imageElement.classList.add('chaos_messages_image');
-    const messageTextElement = document.createElement('div');
-    messageTextElement.classList.add('chaos_message_body');
-    const messageDateElement = document.createElement('div');
-    messageDateElement.classList.add('chaos_message_date');
-    const dateFormat = new Intl.DateTimeFormat('ru', {
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-    messageDateElement.innerText = dateFormat.format(date);
-    messageTextElement.append(imageElement);
-    messageElement.append(messageTextElement, messageDateElement);
-    return messageElement;
+    return DOM.createMessageContainer(imageElement, date);
   }
 
-  // Создаём контейнер выбранного сообщения
-  static createSelectContainer(text, date) {
+  // Элемент сообщения с видео в ленту
+  static createVideoElement(url, fileName, date) {
+    const videoElement = document.createElement('video');
+    videoElement.src = `${url}/${fileName}`;
+    videoElement.controls = true;
+    videoElement.classList.add('chaos_messages_video');
+    return DOM.createMessageContainer(videoElement, date);
+  }
+
+  // Элемент сообщения с аудио в ленту
+  static createAudioElement(url, fileName, date) {
+    const audioElement = document.createElement('audio');
+    audioElement.src = `${url}/${fileName}`;
+    audioElement.controls = true;
+    audioElement.classList.add('chaos_messages_audio');
+    return DOM.createMessageContainer(audioElement, date);
+  }
+
+  // Элемент сообщения с произвольным файлом в ленту
+  static createFileElement(url, fileName, date) {
+    const fileElement = document.createElement('div');
+    fileElement.classList.add('chaos_messages_file');
+    const fileLinkElement = document.createElement('a');
+    fileLinkElement.href = `${url}/${fileName}`;
+    const fileImageElement = document.createElement('div');
+    fileImageElement.classList.add('chaos_messages_file_bg');
+    fileLinkElement.append(fileImageElement);
+    const fileLinkTextElement = fileLinkElement.cloneNode(false);
+    fileLinkTextElement.innerText = fileName;
+    fileElement.append(fileLinkElement, fileLinkTextElement);
+    return DOM.createMessageContainer(fileElement, date);
+  }
+
+  // Контейнер выбранного (selected) из хранилища сообщения
+  static createSelectContainer(date) {
     const selectContainerElement = document.createElement('div');
     selectContainerElement.classList.add('chaos_messages', 'chaos_select_container');
     const selectHeaderElement = document.createElement('div');
@@ -60,25 +102,19 @@ export default class DOM {
     selectHeaderElement.innerText = `Сообщение от ${dateFormat.format(date)}`;
     const selectCloseElement = document.createElement('div');
     selectCloseElement.classList.add('chaos_select_close');
-    const selectMessageContainerElement = document.createElement('div');
-    selectMessageContainerElement.classList.add('chaos_messages_message');
-    const selectMessageElement = document.createElement('div');
-    selectMessageElement.classList.add('chaos_message_body');
-    selectMessageElement.innerHTML = this.linkify(text);
     selectHeaderElement.append(selectCloseElement);
-    selectMessageContainerElement.append(selectMessageElement);
-    selectContainerElement.append(selectHeaderElement, selectMessageContainerElement);
+    selectContainerElement.append(selectHeaderElement);
     return selectContainerElement;
   }
 
-  // Создаём элемент заглушки ошибки соединения
+  // Элемент отображения ошибки соединения
   static createErrorConnectionElement() {
     const connectionErrorElement = document.createElement('div');
     connectionErrorElement.classList.add('chaos_connection_error');
     return connectionErrorElement;
   }
 
-  // Создаём элементы категорий хранилища
+  // Элементы категорий хранилища
   static createSideElement(className, text, count) {
     const sideElement = document.createElement('li');
     sideElement.classList.add('chaos_side_item', className);
@@ -89,7 +125,7 @@ export default class DOM {
     return sideElement;
   }
 
-  // Создаём заголовок открытой категории
+  // Заголовок открытой категории хранилища
   static createSideSubheadElement(text) {
     const subheadElement = document.createElement('div');
     subheadElement.classList.add('chaos_side_subhead');
@@ -101,29 +137,88 @@ export default class DOM {
     return subheadElement;
   }
 
-  // Создаём список открытой категории
+  // Список для элементов открытой категории хранилища
   static createSideCategoryList() {
     const categoryListElement = document.createElement('ul');
     categoryListElement.classList.add('chaos_side_list');
     return categoryListElement;
   }
 
-  // Создаём элементы открытой категории ссылок
-  static createSideLinksElement(link) {
-    const linkElement = document.createElement('li');
-    linkElement.classList.add('chaos_side_item', 'chaos_side_select');
-    linkElement.innerHTML = `<a href="${link}">${link}</a>`;
-    return linkElement;
+  // Основной шаблон для всех элементов открытой категории
+  static createSideElementContainer(bodyElement) {
+    const listElement = document.createElement('li');
+    listElement.classList.add('chaos_side_item', 'chaos_side_open_item');
+    const containerElement = document.createElement('div');
+    containerElement.classList.add('chaos_side_open_container');
+    const selectElement = document.createElement('div');
+    selectElement.classList.add('chaos_side_open_select');
+    const mainElement = document.createElement('div');
+    mainElement.classList.add('chaos_side_open_element');
+    mainElement.append(bodyElement);
+    containerElement.append(selectElement, mainElement);
+    listElement.append(containerElement);
+    return listElement;
   }
 
-  // Создаём форму для отправки файла
+  // Элементы открытой категории ссылок
+  static createSideLinkElement(link) {
+    const bodyElement = document.createElement('p');
+    bodyElement.innerHTML = `<a href="${link}">${link}</a>`;
+    const listElement = DOM.createSideElementContainer(bodyElement);
+    return listElement;
+  }
+
+  // Элементы открытой категории изображений
+  static createSideImageElement(fileName, url) {
+    const bodyElement = document.createElement('img');
+    bodyElement.src = `${url}/${fileName}`;
+    bodyElement.classList.add('chaos_messages_image');
+    const listElement = DOM.createSideElementContainer(bodyElement);
+    return listElement;
+  }
+
+  // Элементы открытой категории видео
+  static createSideVideoElement(fileName, url) {
+    const bodyElement = document.createElement('video');
+    bodyElement.src = `${url}/${fileName}`;
+    bodyElement.classList.add('chaos_messages_video');
+    bodyElement.controls = true;
+    const listElement = DOM.createSideElementContainer(bodyElement);
+    return listElement;
+  }
+
+  // Элементы открытой категории аудио
+  static createSideAudioElement(fileName, url) {
+    const bodyElement = document.createElement('audio');
+    bodyElement.src = `${url}/${fileName}`;
+    bodyElement.classList.add('chaos_messages_audio');
+    bodyElement.controls = true;
+    const listElement = DOM.createSideElementContainer(bodyElement);
+    return listElement;
+  }
+
+  // Элементы открытой категории файлов
+  static createSideFileElement(fileName, url) {
+    const bodyElement = document.createElement('p');
+    bodyElement.innerHTML = `<a href="${url}/${fileName}">${fileName}</a>`;
+    const listElement = DOM.createSideElementContainer(bodyElement);
+    return listElement;
+  }
+
+  // Форма для отправки файла
   static getAddForm() {
     const addFormElement = document.createElement('label');
     addFormElement.classList.add('chaos_file_label');
     addFormElement.innerHTML = `
       <div class="chaos_file_input">Кликни или Кинь</div>
-      <input type="file" class="chaos_file_hidden" accept="image/jpeg,image/png,image/gif,image/heic,image/heif,image/webp">`;
+      <input type="file" class="chaos_file_hidden">`;
     return addFormElement;
+  }
+
+  static getCloseForm() {
+    const closeElement = document.createElement('div');
+    closeElement.classList.add('chaos_form_close');
+    return closeElement;
   }
 
   // // Создаём кнопку отправки файла
@@ -137,7 +232,7 @@ export default class DOM {
   //   return sendButtonContainerElement;
   // }
 
-  // Создаём область сброса файла для Drag and Drop
+  // Область сброса файла для Drag and Drop
   static createDropPlace() {
     const dropplaceContainerElement = document.createElement('div');
     dropplaceContainerElement.classList.add('chaos_dropplace_container');

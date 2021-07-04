@@ -13,8 +13,9 @@ export default class Chaos {
     this.inputElement = this.formElement.querySelector('.chaos_form_input');
     this.clipElement = this.formElement.querySelector('.chaos_form_clip');
     this.addFormElement = this.formElement.querySelector('.chaos_add_container');
-    this.addImageElement = this.addFormElement.querySelector('.chaos_add_images');
+    this.addFileElement = this.addFormElement.querySelector('.chaos_add_files');
     this.messagesElement = this.parentElement.querySelector('.chaos_messages');
+    this.messages = new Map();
 
     // Заводим вспомогательные классы
     this.request = new Request(this.server);
@@ -30,8 +31,14 @@ export default class Chaos {
     this.addFile = this.addFile.bind(this);
     this.renderMessages = this.renderMessages.bind(this);
     this.lazyLoad = this.lazyLoad.bind(this);
-    this.showMessage = this.showMessage.bind(this);
-    this.closeMessage = this.closeMessage.bind(this);
+    this.showSelectMessage = this.showSelectMessage.bind(this);
+    this.closeSelectMessage = this.closeSelectMessage.bind(this);
+    this.showMessageDot = this.showMessageDot.bind(this);
+    this.removeMessageDot = this.removeMessageDot.bind(this);
+    this.showMessageTools = this.showMessageTools.bind(this);
+    this.closeMessageTools = this.closeMessageTools.bind(this);
+    this.deleteMessage = this.deleteMessage.bind(this);
+    this.deleteMessageElement = this.deleteMessageElement.bind(this);
   }
 
   init() {
@@ -41,48 +48,72 @@ export default class Chaos {
       load: this.renderMessages,
       message: this.addMessage,
       file: this.addFile,
+      showMessage: this.showSelectMessage,
+      delete: this.deleteMessageElement,
       sideLoad: this.sidePanel.render,
       sideCategory: this.sidePanel.showCategoryItems,
-      showMessage: this.showMessage,
     };
     this.request.init();
 
+    // Вешаем события
     this.messagesElement.addEventListener('scroll', this.lazyLoad);
     this.formElement.addEventListener('submit', this.submitForm);
     this.clipElement.addEventListener('click', this.showAddForm);
-    this.addImageElement.addEventListener('click', this.fileLoader.openForm);
+    this.addFileElement.addEventListener('click', this.fileLoader.openForm);
+  }
+
+  // Конструктор элемента сообщения в зависимости от типа
+  buildMessageElement(type, id, message, date) {
+    let messageElement = '';
+    switch (type) {
+      case 'text': {
+        messageElement = DOM.createMessageElement(message, date);
+        break;
+      }
+      case 'image': {
+        messageElement = DOM.createImageElement(this.server, message, date);
+        break;
+      }
+      case 'video': {
+        messageElement = DOM.createVideoElement(this.server, message, date);
+        break;
+      }
+      case 'audio': {
+        messageElement = DOM.createAudioElement(this.server, message, date);
+        break;
+      }
+      case 'file': {
+        messageElement = DOM.createFileElement(this.server, message, date);
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+
+    this.messages.set(messageElement, id);
+    messageElement.addEventListener('mouseenter', this.showMessageDot);
+    messageElement.addEventListener('mouseleave', this.removeMessageDot);
+
+    return messageElement;
   }
 
   // Отрисовка сообщений снизу вверх
   renderMessages(data, position) {
     console.log(data);
     for (const message of data) {
-      let messageElement = '';
-      switch (message.type) {
-        case 'text': {
-          messageElement = DOM.createMessageElement(message.message, message.date);
-          break;
-        }
-        case 'image': {
-          messageElement = DOM.createImageElement(this.server, message.message, message.date);
-          break;
-        }
-        case 'video': {
-          break;
-        }
-        default: {
-          return;
-        }
-      }
-      this.messagesElement.prepend(messageElement);
-    }
+      const messageElement = this.buildMessageElement(
+        message.type, message.id, message.message, message.date,
+      );
 
-    // Если первичная загрузка, то проматываем вниз
-    if (!this.databasePosition) {
-      this.messagesElement.scrollTop = this.messagesElement.scrollHeight
-    - this.messagesElement.getBoundingClientRect().height;
+      this.messagesElement.prepend(messageElement);
+
+      // Если первичная загрузка, то проматываем вниз после загрузки содержимого
+      if (!this.databasePosition) {
+        this.scrollBottom(messageElement);
+      }
     }
-    // Если "ленивая" подгрузка, то запоминаем сколько элементов осталось в базе
+    // Если "ленивая" подгрузка, то записываем сколько элементов ещё можно подгрузить сверху
     this.databasePosition = position;
 
     // Верхний элемент-триггер для "ленивой" подгрузки
@@ -100,16 +131,20 @@ export default class Chaos {
     }
   }
 
-  // Показ выбранного сообщения
-  showMessage(message) {
-    const selectContainerElement = DOM.createSelectContainer(message.message, message.date);
+  // Показ выбранного (select) из хранилища сообщения
+  showSelectMessage(message) {
+    const messageElement = this.buildMessageElement(
+      message.type, message.id, message.message, message.date,
+    );
+    const selectContainerElement = DOM.createSelectContainer(message.date);
     const selectCloseElement = selectContainerElement.querySelector('.chaos_select_close');
+    selectContainerElement.append(messageElement);
     this.parentElement.querySelector('.chaos_messages').replaceWith(selectContainerElement);
-    selectCloseElement.addEventListener('click', this.closeMessage);
+    selectCloseElement.addEventListener('click', this.closeSelectMessage);
   }
 
-  // Закрываем выбранное сообщение
-  closeMessage() {
+  // Закрываем выбранное из хранилища сообщение
+  closeSelectMessage() {
     this.parentElement.querySelector('.chaos_select_container').replaceWith(this.messagesElement);
     this.messagesElement.scrollTop = this.messagesElement.scrollHeight
     - this.messagesElement.getBoundingClientRect().height;
@@ -118,9 +153,10 @@ export default class Chaos {
   // Показываем форму прикрепления файлов
   showAddForm() {
     this.addFormElement.classList.toggle('chaos_add_container_visible');
+    this.clipElement.classList.add('chaos_form_clip_active');
   }
 
-  // Отправка сообщений
+  // Отправка текстовых сообщений
   submitForm(event) {
     event.preventDefault();
     const inputValue = this.inputElement.value;
@@ -133,36 +169,114 @@ export default class Chaos {
   }
 
   // Добавляем отправленное сообщение в конец
-  addMessage(text, date) {
-    const messageElement = DOM.createMessageElement(text, date);
+  addMessage(id, text, date) {
+    const messageElement = this.buildMessageElement('text', id, text, date);
+    messageElement.classList.add('chaos_messages_message_animation');
     this.messagesElement.append(messageElement);
 
-    this.messagesElement.scrollTop = this.messagesElement.scrollHeight
-    - this.messagesElement.getBoundingClientRect().height;
+    this.scrollBottom(messageElement);
 
     this.inputElement.value = '';
   }
 
   // Добавляем отправленный файл в конец
-  addFile(type, fileName, date) {
-    switch (type) {
-      case 'image': {
-        const messageElement = DOM.createImageElement(this.server, fileName, date);
-        this.messagesElement.append(messageElement);
-        break;
-      }
-      case 'video': {
-        break;
-      }
-      default: {
-        return;
-      }
-    }
-    this.messagesElement.scrollTop = this.messagesElement.scrollHeight
-    - this.messagesElement.getBoundingClientRect().height;
+  addFile(type, id, fileName, date) {
+    const messageElement = this.buildMessageElement(type, id, fileName, date);
+    messageElement.classList.add('chaos_messages_message_animation');
+    this.messagesElement.append(messageElement);
+
+    this.scrollBottom(messageElement);
   }
 
-  // Ошибка пустого сообщения
+  // Показать точку для открытия дополнительного меню сообщения
+  showMessageDot(event) {
+    const dotElement = event.target.querySelector('.chaos_message_tools');
+    dotElement.classList.toggle('chaos_message_tools_show');
+    dotElement.addEventListener('click', this.showMessageTools);
+  }
+
+  // Скрыть точку для открытия дополнительного меню сообщения
+  removeMessageDot(event) {
+    const dotElement = event.target.querySelector('.chaos_message_tools');
+    dotElement.classList.toggle('chaos_message_tools_show');
+    dotElement.classList.remove('chaos_message_tools_active');
+    const toolsElement = event.target.querySelector('.chaos_message_tools_container');
+    if (toolsElement) {
+      dotElement.removeEventListener('click', this.closeMessageTools);
+      toolsElement.remove();
+    }
+  }
+
+  // Показать дополнительное меню сообщения
+  showMessageTools(event) {
+    const dotElement = event.target;
+    dotElement.classList.add('chaos_message_tools_active');
+    dotElement.removeEventListener('click', this.showMessageTools);
+    dotElement.addEventListener('click', this.closeMessageTools);
+    const toolsElement = DOM.createToolsElements();
+    dotElement.after(toolsElement);
+
+    const deleteElement = toolsElement.querySelector('.chaos_message_tools_delete');
+    // const pinElement = toolsElement.querySelector('.chaos_message_tools_pin');
+    // const favouriteElement = toolsElement.querySelector('.chaos_message_tools_favourite');
+    deleteElement.addEventListener('click', this.deleteMessage);
+    // pinElement.addEventListener('click', this.pinMessage);
+    // favouriteElement.addEventListener('click', this.addTofavourite);
+  }
+
+  // Скрыть дополнительное меню сообщения
+  closeMessageTools(event) {
+    const dotElement = event.target;
+    const toolsElement = dotElement.closest('.chaos_message_header').querySelector('.chaos_message_tools_container');
+    toolsElement.remove();
+    dotElement.classList.toggle('chaos_message_tools_active');
+    dotElement.removeEventListener('click', this.closeMessageTools);
+    dotElement.addEventListener('click', this.showMessageTools);
+  }
+
+  // Запрос на удаление сообщения
+  deleteMessage(event) {
+    const messageId = this.messages.get(event.target.closest('.chaos_messages_message'));
+    this.request.send('delete', messageId);
+  }
+
+  // Удаление элемента сообщения из ленты
+  deleteMessageElement(messageId) {
+    this.closeSelectMessage();
+    this.sidePanel.closeCategory();
+    const messagesElement = [...this.messages.entries()]
+      .filter(({ 1: id }) => id === messageId).map(([key]) => key);
+
+    messagesElement.forEach((item) => {
+      this.messages.delete(item);
+      item.remove();
+    });
+  }
+
+  // Прокрутка сообщений вниз по загрузке их содержимого
+  scrollBottom(messageElement) {
+    // Если содержимое - медийный элемент
+    let checkLoad = messageElement.querySelectorAll('.chaos_message_body video, .chaos_message_body audio');
+    [...checkLoad].forEach((element) => {
+      element.addEventListener('loadeddata', () => {
+        this.messagesElement.scrollTop = this.messagesElement.scrollHeight
+            - this.messagesElement.getBoundingClientRect().height;
+      });
+    });
+    // Если картинка
+    checkLoad = messageElement.querySelectorAll('.chaos_message_body img');
+    [...checkLoad].forEach((element) => {
+      element.addEventListener('load', () => {
+        this.messagesElement.scrollTop = this.messagesElement.scrollHeight
+            - this.messagesElement.getBoundingClientRect().height;
+      });
+    });
+    // Или если текст
+    this.messagesElement.scrollTop = this.messagesElement.scrollHeight
+            - this.messagesElement.getBoundingClientRect().height;
+  }
+
+  // Ошибка отправки пустого сообщения
   showError() {
     this.inputElement.classList.add('chaos_form_invalid');
     this.inputElement.addEventListener('keydown', this.removeError);

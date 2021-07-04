@@ -24,7 +24,7 @@ h1.title {
     font-size: 16px;
 }
 
-.chaos_organizer h2, h3 {
+.chaos_organizer h2, h3, p {
     margin: 0;
 }
 
@@ -83,6 +83,8 @@ h1.title {
 }
 
 .chaos_form {
+    display: flex;
+    align-items: center;
     position: relative;
     width: 85%;
     box-sizing: border-box;
@@ -102,6 +104,14 @@ h1.title {
 
 .chaos_form_input:focus {
     outline: 0;
+}
+
+.chaos_form_close {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    left: 20px;
+    cursor: pointer;
 }
 
 .chaos_file_label {
@@ -214,13 +224,19 @@ h1.title {
 
 .chaos_form_clip {
     position: absolute;
-    width: 28px;
+    width: 32px;
+    height: 32px;
     right: 20px;
-    margin: 8px 0px;
-    top: 0;
-    bottom: 0;
-    background: no-repeat center/contain url('../img/icons/clip.png');
+    background-color: #006363;
+    border: 3px solid #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 0 2px 3px #006363;
+    box-sizing: border-box;
     cursor: pointer;
+}
+
+.chaos_form_clip_active {
+    background: none;
 }
 
 .chaos_add_container {
@@ -229,7 +245,7 @@ h1.title {
     background-color: #ffffff;
     border-radius: 0.5em;
     right: -20px;
-    bottom: 60px;
+    bottom: 50px;
 }
 
 .chaos_add_container_visible {
@@ -254,26 +270,6 @@ h1.title {
     background-color: #5CCCCC;
 }
 
-.chaos_add_images::before {
-    content: '';
-    width: 18px;
-    height: 18px;
-    position: absolute;
-    left: 10px;
-    top: 8px;
-    background: no-repeat center/contain url('../img/icons/image.png');
-}
-
-.chaos_add_media::before {
-    content: '';
-    width: 18px;
-    height: 18px;
-    position: absolute;
-    left: 10px;
-    top: 8px;
-    background: no-repeat center/contain url('../img/icons/media.png');
-}
-
 .chaos_add_files::before {
     content: '';
     width: 18px;
@@ -281,7 +277,27 @@ h1.title {
     position: absolute;
     left: 10px;
     top: 8px;
-    background: no-repeat center/contain url('../img/icons/file.png');
+    background: no-repeat center/contain url('../img/icons/clip.png');
+}
+
+.chaos_add_video::before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    left: 10px;
+    top: 8px;
+    background: no-repeat center/contain url('../img/icons/video.png');
+}
+
+.chaos_add_audio::before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    left: 10px;
+    top: 8px;
+    background: no-repeat center/contain url('../img/icons/microphone.png');
 }
 
 .chaos_add_geo::before {
@@ -304,12 +320,12 @@ h1.title {
     align-items: flex-end;
     padding: 20px 30px 10px 30px;
     overflow: auto;
+    overflow-x: hidden;
 }
 
 .chaos_messages_message {
     position: relative;
     margin-bottom: 20px;
-    padding: 15px 15px 25px 15px;
     min-width: 10%;
     max-width: 60%;
     background-color: rgb(176, 255, 212);
@@ -317,26 +333,101 @@ h1.title {
     border-radius: 0.5em;
 }
 
+.chaos_messages_message_animation {
+    animation: appearance 600ms ease-in-out;
+}
+
+@keyframes appearance {
+    from {
+        transform: scaleY(0) translateX(300px) skew(20deg);
+        opacity: 0;
+    }
+}
+
+.chaos_message_header {
+    height: 10px;
+}
+
+.chaos_message_tools {
+    display: none;
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    top: 6px;
+    right: 15px;
+    background-color: #006363;
+    border: 1px solid #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px #006363;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.chaos_message_tools_show {
+    display: block;
+}
+
+.chaos_message_tools_active {
+    background: none;
+}
+
+.chaos_message_tools_container {
+    display: flex;
+    height: 13px;
+    position: absolute;
+    right: 25px;
+    top: 5px;
+}
+
+.chaos_message_tools_delete, .chaos_message_tools_pin, .chaos_message_tools_favourite {
+    margin-right: 15px;
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+}
+
+.chaos_message_tools_delete {
+    background: no-repeat center/contain url('../img/icons/delete.png');
+}
+
+.chaos_message_tools_pin {
+    background: no-repeat center/contain url('../img/icons/pin.png');
+}
+
+.chaos_message_tools_favourite {
+    background: no-repeat center/contain url('../img/icons/favourite.png');
+}
+
 .chaos_message_body {
     word-break: break-word;
+    padding: 15px;
 }
 
 .chaos_message_date {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
     font-size: 0.8em;
     background-color: #5c8a01;
     color: #ffffff;
     text-align: right;
-    padding-right: 1em;
+    padding: 0 15px;
     border-bottom-left-radius: 0.5em;
     border-bottom-right-radius: 0.5em;
 }
 
-.chaos_messages_image {
+.chaos_messages_image, .chaos_messages_video, .chaos_messages_audio {
+    display: block;
     max-width: 100%;
+}
+
+.chaos_messages_file {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.chaos_messages_file_bg {
+    width: 128px;
+    height: 128px;
+    background: no-repeat center/contain url('../img/icons/filedownload.png');
 }
 
 /* ОКНО СООБЩЕНИЙ - ВЫБРАННОЕ СООБЩЕНИЕ */
@@ -346,6 +437,9 @@ h1.title {
 }
 
 .chaos_select_header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     position: relative;
     width: 85%;
     box-sizing: border-box;
@@ -357,15 +451,13 @@ h1.title {
     color: #ffffff;
     font-size: 1.2em;
     font-weight: bold;
-    text-align: center;
 }
 
 .chaos_select_close {
     position: absolute;
-    top: 0;
+    width: 20px;
+    height: 20px;
     right: 40px;
-    line-height: 35px;
-    font-size: 40px;
     cursor: pointer;
     font-weight: normal;
 }
@@ -373,15 +465,18 @@ h1.title {
 /* БОКОВОЕ ОКНО */
 
 .chaos_side {
+    width: 335px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
     background-color: #006363;
     background: linear-gradient(225deg, #006363, #1D7373);
-    flex: 1;
     border-top-right-radius: 0.5em;
     border-bottom-right-radius: 0.5em;
 }
 
 .chaos_side_header {
-    width: 100%;
+    width: 335px;
     background-color: #86B32D;
     background: linear-gradient(45deg, #5c8a01, #86B32D, #5c8a01);
     border-top-right-radius: 0.3em;
@@ -391,6 +486,8 @@ h1.title {
 }
 
 .chaos_side_subhead {
+    display: flex;
+    align-items: center;
     position: relative;
     background-color: #C9F76F;
     background: linear-gradient(225deg, #C9F76F, #B9F73E);
@@ -400,21 +497,21 @@ h1.title {
 
 .chaos_side_close {
     position: absolute;
-    top: 0;
+    width: 20px;
+    height: 20px;
     right: 40px;
-    line-height: 30px;
-    font-size: 40px;
     cursor: pointer;
 }
 
-.chaos_select_close::after, .chaos_side_close::after {
-    content: '×';
+.chaos_select_close, .chaos_side_close, .chaos_form_close {
+    background: no-repeat center/contain url('../img/icons/close.png');
 }
 
 .chaos_side_list {
     list-style: none;
     margin: 0;
     padding: 20px 40px;
+    overflow: auto;
 }
 
 .chaos_side_item {
@@ -479,6 +576,16 @@ h1.title {
     background: no-repeat center/contain url('../img/icons/video.png');
 }
 
+.chaos_side_audios::before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    left: 15px;
+    top: 12px;
+    background: no-repeat center/contain url('../img/icons/audio.png');
+}
+
 .chaos_side_favourites::before {
     content: '';
     width: 18px;
@@ -489,18 +596,41 @@ h1.title {
     background: no-repeat center/contain url('../img/icons/favourite.png');
 }
 
-.chaos_side_select {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.chaos_side_open_item {
+    padding: 0;
+    cursor: auto;
 }
 
-.chaos_side_select::before {
+.chaos_side_open_item:hover {
+    background-color: #ffffff;
+}
+
+.chaos_side_open_container {
+    display: flex;
+}
+
+.chaos_side_open_select {
+    width: 40px;
+    cursor: pointer;
+    border-top-left-radius: 0.5em;
+    border-bottom-left-radius: 0.5em;
+}
+
+.chaos_side_open_select:hover {
+    background-color: #86B32D;
+}
+
+.chaos_side_open_select::before {
     content: '';
     width: 18px;
     height: 18px;
     position: absolute;
-    left: 15px;
+    left: 10px;
     top: 12px;
     background: no-repeat center/contain url('../img/icons/arrow.png');
+}
+
+.chaos_side_open_element {
+    width: 100%;
+    padding: 7px 15px 7px 5px;
 }

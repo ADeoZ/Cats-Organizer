@@ -6,6 +6,7 @@ export default class FileLoader {
     this.parentElement = element;
     this.formElement = this.parentElement.querySelector('.chaos_form');
     this.mainElement = this.parentElement.querySelector('.chaos_main');
+    this.clipElement = this.formElement.querySelector('.chaos_form_clip');
     this.inputElement = this.formElement.querySelector('.chaos_form_input');
     this.buttonElement = this.formElement.querySelector('.chaos_file_button');
     this.dropplace = this.parentElement.querySelector('.chaos_dropplace');
@@ -23,11 +24,14 @@ export default class FileLoader {
 
   // Открываем форму прикрепления файла
   openForm() {
+    this.closeElement = DOM.getCloseForm();
+    this.formElement.prepend(this.closeElement);
     this.addFormElement = DOM.getAddForm();
     this.inputElement.replaceWith(this.addFormElement);
     this.inputFileElement = this.addFormElement.querySelector('input.chaos_file_hidden');
     this.dropplace = DOM.createDropPlace();
     this.mainElement.prepend(this.dropplace);
+    this.closeElement.addEventListener('click', this.closeForm);
     this.mainElement.addEventListener('dragover', this.showDropPlace);
     this.dropplace.addEventListener('dragleave', this.hideDropPlace);
     this.dropplace.addEventListener('drop', this.loadFile);
@@ -36,6 +40,8 @@ export default class FileLoader {
 
   // Закрываем форму
   closeForm() {
+    this.closeElement.remove();
+    this.clipElement.classList.remove('chaos_form_clip_active');
     this.addFormElement.replaceWith(this.inputElement);
   }
 

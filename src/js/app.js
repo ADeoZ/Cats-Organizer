@@ -1,4 +1,5 @@
 import Chaos from './Chaos';
 
-const chat = new Chaos(document.querySelector('.chaos_organizer'), 'http://localhost:7070');
-chat.init();
+// const chaos = new Chaos(document.querySelector('.chaos_organizer'), 'http://localhost:7070');
+const chaos = new Chaos(document.querySelector('.chaos_organizer'), 'https://scenic-joshua-tree-94502.herokuapp.com/');
+chaos.init();

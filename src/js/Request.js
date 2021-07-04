@@ -25,21 +25,26 @@ export default class Request {
       }
       // Успешная отправка текстового сообщения
       if (data.event === 'text') {
-        this.callbacks.message(data.message, data.date);
+        this.callbacks.message(data.id, data.message, data.date);
         this.callbacks.sideLoad(data.side);
       }
       // Успешная отправка файла
       if (data.event === 'file') {
-        this.callbacks.file(data.type, data.message, data.date);
+        this.callbacks.file(data.type, data.id, data.message, data.date);
         this.callbacks.sideLoad(data.side);
       }
       // Ответ с базой по категории хранилища
       if (data.event === 'storage') {
         this.callbacks.sideCategory(data);
       }
-      // Ответ с запрошенным сообщением
+      // Ответ с выбранным из хранилища сообщением
       if (data.event === 'select') {
         this.callbacks.showMessage(data.message);
+      }
+      // Ответ с выбранным из хранилища сообщением
+      if (data.event === 'delete') {
+        this.callbacks.delete(data.id);
+        this.callbacks.sideLoad(data.side);
       }
     });
 
@@ -59,6 +64,7 @@ export default class Request {
   sendFile(formData) {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', `${this.server}/upload`);
+    xhr.addEventListener('error', () => this.callbacks.error());
     xhr.send(formData);
   }
 }
