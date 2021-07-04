@@ -24,6 +24,10 @@ export default class FileLoader {
 
   // Открываем форму прикрепления файла
   openForm() {
+    const ifFormOpen = this.formElement.querySelector('.chaos_file_label');
+    if (ifFormOpen) {
+      return
+    }
     this.closeElement = DOM.getCloseForm();
     this.formElement.prepend(this.closeElement);
     this.addFormElement = DOM.getAddForm();

@@ -153,7 +153,7 @@ export default class Chaos {
   // Показываем форму прикрепления файлов
   showAddForm() {
     this.addFormElement.classList.toggle('chaos_add_container_visible');
-    this.clipElement.classList.add('chaos_form_clip_active');
+    this.clipElement.classList.toggle('chaos_form_clip_active');
   }
 
   // Отправка текстовых сообщений
@@ -242,8 +242,12 @@ export default class Chaos {
 
   // Удаление элемента сообщения из ленты
   deleteMessageElement(messageId) {
-    this.closeSelectMessage();
-    this.sidePanel.closeCategory();
+    const ifSelectedMessage = this.parentElement.querySelector('.chaos_select_container');
+    if (ifSelectedMessage) {
+      this.closeSelectMessage();
+      this.sidePanel.closeCategory();
+    }
+
     const messagesElement = [...this.messages.entries()]
       .filter(({ 1: id }) => id === messageId).map(([key]) => key);
 
