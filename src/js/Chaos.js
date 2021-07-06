@@ -2,6 +2,8 @@ import Request from './Request';
 import DOM from './DOM';
 import SidePanel from './SidePanel';
 import FileLoader from './FileLoader';
+import MediaLoader from './MediaLoader';
+import Geolocation from './Geolocation';
 
 export default class Chaos {
   constructor(element, server) {
@@ -14,13 +16,18 @@ export default class Chaos {
     this.clipElement = this.formElement.querySelector('.chaos_form_clip');
     this.addFormElement = this.formElement.querySelector('.chaos_add_container');
     this.addFileElement = this.addFormElement.querySelector('.chaos_add_files');
+    this.addAudioElement = this.addFormElement.querySelector('.chaos_add_audio');
+    this.addVideoElement = this.addFormElement.querySelector('.chaos_add_video');
+    this.addGeoElement = this.addFormElement.querySelector('.chaos_add_geo');
     this.messagesElement = this.parentElement.querySelector('.chaos_messages');
     this.messages = new Map();
 
     // Заводим вспомогательные классы
     this.request = new Request(this.server);
     this.sidePanel = new SidePanel(this.parentElement.querySelector('aside.chaos_side'), this.request);
-    this.fileLoader = new FileLoader(this.parentElement, this.request);
+    this.geolocation = new Geolocation(this.parentElement);
+    this.fileLoader = new FileLoader(this.parentElement, this.geolocation, this.request);
+    this.mediaLoader = new MediaLoader(this.parentElement, this.geolocation, this.request);
 
     // Привязываем контекст
     this.submitForm = this.submitForm.bind(this);
@@ -60,30 +67,33 @@ export default class Chaos {
     this.formElement.addEventListener('submit', this.submitForm);
     this.clipElement.addEventListener('click', this.showAddForm);
     this.addFileElement.addEventListener('click', this.fileLoader.openForm);
+    this.addAudioElement.addEventListener('click', this.mediaLoader.openMedia);
+    this.addVideoElement.addEventListener('click', this.mediaLoader.openMedia);
+    this.addGeoElement.addEventListener('click', this.geolocation.attachGeo);
   }
 
   // Конструктор элемента сообщения в зависимости от типа
-  buildMessageElement(type, id, message, date) {
+  buildMessageElement(type, id, message, geo, date) {
     let messageElement = '';
     switch (type) {
       case 'text': {
-        messageElement = DOM.createMessageElement(message, date);
+        messageElement = DOM.createMessageElement(message, geo, date);
         break;
       }
       case 'image': {
-        messageElement = DOM.createImageElement(this.server, message, date);
+        messageElement = DOM.createImageElement(this.server, message, geo, date);
         break;
       }
       case 'video': {
-        messageElement = DOM.createVideoElement(this.server, message, date);
+        messageElement = DOM.createVideoElement(this.server, message, geo, date);
         break;
       }
       case 'audio': {
-        messageElement = DOM.createAudioElement(this.server, message, date);
+        messageElement = DOM.createAudioElement(this.server, message, geo, date);
         break;
       }
       case 'file': {
-        messageElement = DOM.createFileElement(this.server, message, date);
+        messageElement = DOM.createFileElement(this.server, message, geo, date);
         break;
       }
       default: {
@@ -103,7 +113,7 @@ export default class Chaos {
     console.log(data);
     for (const message of data) {
       const messageElement = this.buildMessageElement(
-        message.type, message.id, message.message, message.date,
+        message.type, message.id, message.message, message.geo, message.date,
       );
 
       this.messagesElement.prepend(messageElement);
@@ -134,7 +144,7 @@ export default class Chaos {
   // Показ выбранного (select) из хранилища сообщения
   showSelectMessage(message) {
     const messageElement = this.buildMessageElement(
-      message.type, message.id, message.message, message.date,
+      message.type, message.id, message.message, message.geo, message.date,
     );
     const selectContainerElement = DOM.createSelectContainer(message.date);
     const selectCloseElement = selectContainerElement.querySelector('.chaos_select_close');
@@ -165,18 +175,19 @@ export default class Chaos {
       return;
     }
 
-    this.request.send('message', this.inputElement.value);
+    this.request.send('message', { text: this.inputElement.value, geo: this.geolocation.coords });
   }
 
   // Добавляем отправленное сообщение в конец
-  addMessage(id, text, date) {
-    const messageElement = this.buildMessageElement('text', id, text, date);
+  addMessage(id, text, geo, date) {
+    const messageElement = this.buildMessageElement('text', id, text, geo, date);
     messageElement.classList.add('chaos_messages_message_animation');
     this.messagesElement.append(messageElement);
 
     this.scrollBottom(messageElement);
 
     this.inputElement.value = '';
+    this.geolocation.removeCoords();
   }
 
   // Добавляем отправленный файл в конец

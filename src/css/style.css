@@ -84,6 +84,7 @@ h1.title {
 
 .chaos_form {
     display: flex;
+    justify-content: center;
     align-items: center;
     position: relative;
     width: 85%;
@@ -95,8 +96,9 @@ h1.title {
 }
 
 .chaos_form_input {
-    width: 90%;
+    width: 100%;
     border: 0;
+    margin-right: 50px;
     padding: 10px 5px;
     font-size: 1.2em;
     border-radius: 0.5em;
@@ -118,7 +120,7 @@ h1.title {
     display: flex;
     align-items: baseline;
     width: 250px;
-    margin: 0 auto;
+    margin: 0 40px;
 }
 
 .chaos_file_input {
@@ -194,6 +196,56 @@ h1.title {
     content: 'Кидай файл сюда';
     font-size: 1.2em;
     font-weight: bold;
+}
+
+.chaos_media_container {
+    display: flex;
+    width: 250px;
+    height: 42px;
+    margin: 0 40px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chaos_media_record {
+    width: 20px;
+    height: 20px;
+    background-color: darkred;
+    border-radius: 50%;
+}
+
+.chaos_media_status {
+    padding: 0 10px;
+}
+
+.chaos_media_stop {
+    width: 20px;
+    height: 20px;
+    background-color: #000000;
+}
+
+.chaos_geo {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    left: 20px;
+    top: -20px;
+    background-color: #ffffff;
+}
+
+.chaos_geo_icon {
+    width: 0.8em;
+    height: 0.8em;
+    margin-left: 5px;
+    background: no-repeat center/contain url('../img/icons/geo.png');
+}
+
+.chaos_geo_close {
+    width: 14px;
+    height: 14px;
+    margin-right: 5px;
+    margin-left: 15px;
+    cursor: pointer;
 }
 
 .chaos_form_invalid {
@@ -403,6 +455,14 @@ h1.title {
     padding: 15px;
 }
 
+.chaos_message_geo {
+    display: flex;
+    justify-content: flex-end;
+    align-items: baseline;
+    padding: 0 15px;
+    font-size: 0.8em;
+}
+
 .chaos_message_date {
     font-size: 0.8em;
     background-color: #5c8a01;
@@ -503,7 +563,7 @@ h1.title {
     cursor: pointer;
 }
 
-.chaos_select_close, .chaos_side_close, .chaos_form_close {
+.chaos_select_close, .chaos_side_close, .chaos_form_close, .chaos_geo_close {
     background: no-repeat center/contain url('../img/icons/close.png');
 }
 

@@ -25,12 +25,12 @@ export default class Request {
       }
       // Успешная отправка текстового сообщения
       if (data.event === 'text') {
-        this.callbacks.message(data.id, data.message, data.date);
+        this.callbacks.message(data.id, data.message, data.geo, data.date);
         this.callbacks.sideLoad(data.side);
       }
       // Успешная отправка файла
       if (data.event === 'file') {
-        this.callbacks.file(data.type, data.id, data.message, data.date);
+        this.callbacks.file(data.type, data.id, data.message, data.geo, data.date);
         this.callbacks.sideLoad(data.side);
       }
       // Ответ с базой по категории хранилища

@@ -1,7 +1,7 @@
 import DOM from './DOM';
 
 export default class FileLoader {
-  constructor(element, requestClass) {
+  constructor(element, geoClass, requestClass) {
     // Собираем элементы
     this.parentElement = element;
     this.formElement = this.parentElement.querySelector('.chaos_form');
@@ -12,6 +12,7 @@ export default class FileLoader {
     this.dropplace = this.parentElement.querySelector('.chaos_dropplace');
 
     // Заводим вспомогательные классы
+    this.geolocation = geoClass;
     this.request = requestClass;
 
     // Привязываем контекст
@@ -24,14 +25,17 @@ export default class FileLoader {
 
   // Открываем форму прикрепления файла
   openForm() {
-    const ifFormOpen = this.formElement.querySelector('.chaos_file_label');
-    if (ifFormOpen) {
-      return;
+    while (this.formElement.firstChild) {
+      this.formElement.removeChild(this.formElement.firstChild);
     }
     this.closeElement = DOM.getCloseForm();
-    this.formElement.prepend(this.closeElement);
     this.addFormElement = DOM.getAddForm();
-    this.inputElement.replaceWith(this.addFormElement);
+    this.formElement.append(this.closeElement, this.addFormElement, this.clipElement);
+
+    if (this.geolocation.coords) {
+      this.formElement.append(this.geolocation.geoElement);
+    }
+
     this.inputFileElement = this.addFormElement.querySelector('input.chaos_file_hidden');
     this.dropplace = DOM.createDropPlace();
     this.mainElement.prepend(this.dropplace);
@@ -63,13 +67,17 @@ export default class FileLoader {
   // Отправляем файл
   loadFile(event) {
     event.preventDefault();
-    this.hideDropPlace();
-    this.mainElement.removeEventListener('dragover', this.showDropPlace);
-    this.closeForm();
 
     const file = this.inputFileElement.files[0] || event.dataTransfer.files[0];
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('geo', this.geolocation.coords);
+
     this.request.sendFile(formData);
+
+    this.hideDropPlace();
+    this.mainElement.removeEventListener('dragover', this.showDropPlace);
+    this.closeForm();
+    this.geolocation.removeCoords();
   }
 }
