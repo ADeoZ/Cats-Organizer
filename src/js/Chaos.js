@@ -24,7 +24,7 @@ export default class Chaos {
 
     // Заводим вспомогательные классы
     this.request = new Request(this.server);
-    this.sidePanel = new SidePanel(this.parentElement.querySelector('aside.chaos_side'), this.request);
+    this.sidePanel = new SidePanel(this.parentElement.querySelector('aside.chaos_side'), this, this.request);
     this.geolocation = new Geolocation(this.parentElement);
     this.fileLoader = new FileLoader(this.parentElement, this.geolocation, this.request);
     this.mediaLoader = new MediaLoader(this.parentElement, this.geolocation, this.request);
@@ -46,6 +46,10 @@ export default class Chaos {
     this.closeMessageTools = this.closeMessageTools.bind(this);
     this.deleteMessage = this.deleteMessage.bind(this);
     this.deleteMessageElement = this.deleteMessageElement.bind(this);
+    this.addToFavourites = this.addToFavourites.bind(this);
+    this.removeFromFavourites = this.removeFromFavourites.bind(this);
+    this.showFavouriteMark = this.showFavouriteMark.bind(this);
+    this.removeFavouriteMark = this.removeFavouriteMark.bind(this);
   }
 
   init() {
@@ -57,6 +61,8 @@ export default class Chaos {
       file: this.addFile,
       showMessage: this.showSelectMessage,
       delete: this.deleteMessageElement,
+      favourite: this.showFavouriteMark,
+      favouriteRemove: this.removeFavouriteMark,
       sideLoad: this.sidePanel.render,
       sideCategory: this.sidePanel.showCategoryItems,
     };
@@ -109,12 +115,16 @@ export default class Chaos {
   }
 
   // Отрисовка сообщений снизу вверх
-  renderMessages(data, position) {
+  renderMessages(data, favourites, position) {
     console.log(data);
     for (const message of data) {
       const messageElement = this.buildMessageElement(
         message.type, message.id, message.message, message.geo, message.date,
       );
+
+      if (favourites.indexOf(message.id) !== -1) {
+        this.showFavouriteMark(message.id);
+      }
 
       this.messagesElement.prepend(messageElement);
 
@@ -155,6 +165,11 @@ export default class Chaos {
 
   // Закрываем выбранное из хранилища сообщение
   closeSelectMessage() {
+    const ifSelectedMessage = this.parentElement.querySelector('.chaos_select_container');
+    if (!ifSelectedMessage) {
+      return;
+    }
+
     this.parentElement.querySelector('.chaos_select_container').replaceWith(this.messagesElement);
     this.messagesElement.scrollTop = this.messagesElement.scrollHeight
     - this.messagesElement.getBoundingClientRect().height;
@@ -202,14 +217,14 @@ export default class Chaos {
   // Показать точку для открытия дополнительного меню сообщения
   showMessageDot(event) {
     const dotElement = event.target.querySelector('.chaos_message_tools');
-    dotElement.classList.toggle('chaos_message_tools_show');
+    dotElement.classList.add('chaos_message_tools_show');
     dotElement.addEventListener('click', this.showMessageTools);
   }
 
   // Скрыть точку для открытия дополнительного меню сообщения
   removeMessageDot(event) {
     const dotElement = event.target.querySelector('.chaos_message_tools');
-    dotElement.classList.toggle('chaos_message_tools_show');
+    dotElement.classList.remove('chaos_message_tools_show');
     dotElement.classList.remove('chaos_message_tools_active');
     const toolsElement = event.target.querySelector('.chaos_message_tools_container');
     if (toolsElement) {
@@ -229,17 +244,19 @@ export default class Chaos {
 
     const deleteElement = toolsElement.querySelector('.chaos_message_tools_delete');
     // const pinElement = toolsElement.querySelector('.chaos_message_tools_pin');
-    // const favouriteElement = toolsElement.querySelector('.chaos_message_tools_favourite');
+    const favouriteElement = toolsElement.querySelector('.chaos_message_tools_favourite');
     deleteElement.addEventListener('click', this.deleteMessage);
     // pinElement.addEventListener('click', this.pinMessage);
-    // favouriteElement.addEventListener('click', this.addTofavourite);
+    favouriteElement.addEventListener('click', this.addToFavourites);
   }
 
   // Скрыть дополнительное меню сообщения
   closeMessageTools(event) {
     const dotElement = event.target;
     const toolsElement = dotElement.closest('.chaos_message_header').querySelector('.chaos_message_tools_container');
-    toolsElement.remove();
+    if (toolsElement) {
+      toolsElement.remove();
+    }
     dotElement.classList.toggle('chaos_message_tools_active');
     dotElement.removeEventListener('click', this.closeMessageTools);
     dotElement.addEventListener('click', this.showMessageTools);
@@ -266,6 +283,41 @@ export default class Chaos {
       this.messages.delete(item);
       item.remove();
     });
+  }
+
+  // Запрос на добавление в избранное
+  addToFavourites(event) {
+    const messageId = this.messages.get(event.target.closest('.chaos_messages_message'));
+
+    const isFavouriteMark = event.target.closest('.chaos_messages_message').querySelector('.chaos_message_favourite');
+    if (isFavouriteMark) {
+      return;
+    }
+
+    this.request.send('favourite', messageId);
+    this.closeMessageTools(event);
+  }
+
+  // Запрос на удаление из избранного
+  removeFromFavourites(event) {
+    const messageId = this.messages.get(event.target.closest('.chaos_messages_message'));
+    this.request.send('favouriteRemove', messageId);
+  }
+
+  // Добавляем метку избранного на сообщение
+  showFavouriteMark(messageId) {
+    const messageElement = [...this.messages.entries()]
+      .filter(({ 1: id }) => id === messageId).map(([key]) => key);
+
+    const favouriteElement = DOM.getFavouriteMark();
+    messageElement[0].querySelector('.chaos_message_header').prepend(favouriteElement);
+    favouriteElement.addEventListener('click', this.removeFromFavourites);
+  }
+
+  removeFavouriteMark(messageId) {
+    const messageElement = [...this.messages.entries()]
+      .filter(({ 1: id }) => id === messageId).map(([key]) => key);
+    messageElement[0].querySelector('.chaos_message_favourite').remove();
   }
 
   // Прокрутка сообщений вниз по загрузке их содержимого

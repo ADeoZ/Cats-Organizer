@@ -38,17 +38,22 @@ export default class DOM {
     return messageElement;
   }
 
+  // Элементы управления для сообщения (удалить, закрепить, избранное)
   static createToolsElements() {
     const toolsElements = document.createElement('div');
     toolsElements.classList.add('chaos_message_tools_container');
-    const deleteElement = document.createElement('div');
-    deleteElement.classList.add('chaos_message_tools_delete');
-    const pinElement = document.createElement('div');
-    pinElement.classList.add('chaos_message_tools_pin');
-    const favouriteElement = document.createElement('div');
-    favouriteElement.classList.add('chaos_message_tools_favourite');
-    toolsElements.append(deleteElement, pinElement, favouriteElement);
+    toolsElements.innerHTML = `
+      <div class="chaos_message_tools_delete"></div>
+      <div class="chaos_message_tools_pin"></div>
+      <div class="chaos_message_tools_favourite"></div>
+    `;
     return toolsElements;
+  }
+
+  static getFavouriteMark() {
+    const favouriteElement = document.createElement('div');
+    favouriteElement.classList.add('chaos_message_favourite');
+    return favouriteElement;
   }
 
   // Элемент текстового сообщения ленты

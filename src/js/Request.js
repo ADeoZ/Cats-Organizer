@@ -20,7 +20,7 @@ export default class Request {
       const data = JSON.parse(event.data);
       // Ответ с базой сообщений
       if (data.event === 'database') {
-        this.callbacks.load(data.dB, data.position);
+        this.callbacks.load(data.dB, data.favourites, data.position);
         this.callbacks.sideLoad(data.side);
       }
       // Успешная отправка текстового сообщения
@@ -41,10 +41,26 @@ export default class Request {
       if (data.event === 'select') {
         this.callbacks.showMessage(data.message);
       }
-      // Ответ с выбранным из хранилища сообщением
+      // Успешное удаление сообщения
       if (data.event === 'delete') {
         this.callbacks.delete(data.id);
         this.callbacks.sideLoad(data.side);
+      }
+      // Успешное добавление в избранное сообщения
+      if (data.event === 'favourite') {
+        this.callbacks.favourite(data.id);
+        this.callbacks.sideLoad(data.side);
+      }
+      // Успешное удаление сообщения из избранного
+      if (data.event === 'favouriteRemove') {
+        this.callbacks.favouriteRemove(data.id);
+        this.callbacks.sideLoad(data.side);
+      }
+      // Успешное удаление сообщения из избранного
+      if (data.event === 'favouritesLoad') {
+        this.callbacks.load(data.dB, data.favourites, 0);
+        // this.callbacks.favouriteRemove(data.id);
+        // this.callbacks.sideLoad(data.side);
       }
     });
 

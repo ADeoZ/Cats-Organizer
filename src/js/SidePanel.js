@@ -1,12 +1,13 @@
 import DOM from './DOM';
 
 export default class SidePanel {
-  constructor(element, requestClass) {
+  constructor(element, messageClass, requestClass) {
     // Собираем элементы
     this.parentElement = element;
     this.listElement = this.parentElement.querySelector('.chaos_side_list');
 
     // Заводим вспомогательные классы
+    this.messageClass = messageClass;
     this.request = requestClass;
 
     // Привязываем контекст
@@ -35,13 +36,24 @@ export default class SidePanel {
       );
       this.listElement.append(sideElement);
       if (data[type] > 0) {
-        // sideElement.addEventListener('click', this.classNames[type].handler);
-        sideElement.addEventListener('click', () => {
-          this.openCategory(this.categoryItems[type].text);
-          this.request.send('storage', type);
-        });
+        sideElement.addEventListener('click', () => this.requestCategoryItems(type));
       }
     }
+  }
+
+  requestCategoryItems(type) {
+    if (type === 'favourites') {
+      this.category = 'favourites';
+      this.openCategory(this.categoryItems[type].text);
+      this.request.send('favouritesLoad');
+      while (this.messageClass.messagesElement.firstChild) {
+        this.messageClass.messagesElement.removeChild(this.messageClass.messagesElement.firstChild);
+      }
+      return;
+    }
+
+    this.openCategory(this.categoryItems[type].text);
+    this.request.send('storage', type);
   }
 
   // Открытие категории хранилища
@@ -55,8 +67,20 @@ export default class SidePanel {
   // Закрываем категорию, возвращаем список
   closeCategory() {
     this.parentElement.querySelector('.chaos_side_subhead').remove();
+
+    if (this.category === 'favourites') {
+      while (this.messageClass.messagesElement.firstChild) {
+        this.messageClass.messagesElement.removeChild(this.messageClass.messagesElement.firstChild);
+      }
+      this.request.send('load');
+      this.parentElement.append(this.listElement);
+      this.category = '';
+      return;
+    }
+
     this.parentElement.querySelector('.chaos_side_list').remove();
     this.parentElement.append(this.listElement);
+    this.messageClass.closeSelectMessage();
   }
 
   // Отрисовываем элементы категории
@@ -70,26 +94,4 @@ export default class SidePanel {
     }
     this.parentElement.append(categoryListElement);
   }
-
-  // // Отрисовываем список ссылок
-  // showLinksItems(data) {
-  //   const categoryListElement = DOM.createSideCategoryList();
-  //   for (const item of data.data) {
-  //     const linkElement = DOM.createSideLinksElement(item.link);
-  //     categoryListElement.append(linkElement);
-  //     linkElement.addEventListener('click', () => this.request.send('select', item.messageId));
-  //   }
-  //   this.parentElement.append(categoryListElement);
-  // }
-
-  // // Отрисовываем список изображений
-  // showImageItems(data) {
-  //   const categoryListElement = DOM.createSideCategoryList();
-  //   for (const item of data.data) {
-  //     const imageElement = DOM.createSideLinksElement(item.link);
-  //     categoryListElement.append(linkElement);
-  //     linkElement.addEventListener('click', () => this.request.send('select', item.messageId));
-  //   }
-  //   this.parentElement.append(categoryListElement);
-  // }
 }

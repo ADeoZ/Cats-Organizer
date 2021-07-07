@@ -450,6 +450,17 @@ h1.title {
     background: no-repeat center/contain url('../img/icons/favourite.png');
 }
 
+.chaos_message_favourite {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    top: 5px;
+    right: 40px;
+    box-sizing: border-box;
+    cursor: pointer;
+    background: no-repeat center/contain url('../img/icons/favouritemark.png');
+}
+
 .chaos_message_body {
     word-break: break-word;
     padding: 15px;
