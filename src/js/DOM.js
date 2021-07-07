@@ -166,15 +166,14 @@ export default class DOM {
   static createSideElementContainer(bodyElement) {
     const listElement = document.createElement('li');
     listElement.classList.add('chaos_side_item', 'chaos_side_open_item');
-    const containerElement = document.createElement('div');
-    containerElement.classList.add('chaos_side_open_container');
-    const selectElement = document.createElement('div');
-    selectElement.classList.add('chaos_side_open_select');
-    const mainElement = document.createElement('div');
-    mainElement.classList.add('chaos_side_open_element');
-    mainElement.append(bodyElement);
-    containerElement.append(selectElement, mainElement);
-    listElement.append(containerElement);
+    listElement.innerHTML = `
+      <div class="chaos_side_open_container">
+        <div class="chaos_side_open_select"></div>
+        <div class="chaos_side_open_element">
+        </div>
+      </div>
+    `;
+    listElement.querySelector('.chaos_side_open_element').append(bodyElement);
     return listElement;
   }
 
@@ -220,6 +219,29 @@ export default class DOM {
     const bodyElement = document.createElement('p');
     bodyElement.innerHTML = `<a href="${url}/${fileName}">${fileName}</a>`;
     const listElement = DOM.createSideElementContainer(bodyElement);
+    return listElement;
+  }
+
+  // Элемент описание категории избранного
+  static createFavouritesDescription(count, dateFrom, dateTo) {
+    const dateFormat = new Intl.DateTimeFormat('ru', {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    const listElement = document.createElement('li');
+    listElement.classList.add('chaos_side_item', 'chaos_side_open_item');
+    listElement.innerHTML = `
+      <div class="chaos_side_open_container">
+        <div class="chaos_side_open_element">
+          <p class="chaos_side_favourites_description">Всего сообщений: <b>${count}</b><br>
+          С <b>${dateFormat.format(dateFrom)}</b><br>
+          По <b>${dateFormat.format(dateTo)}</b></p>
+        </div>
+      </div>
+    `;
     return listElement;
   }
 

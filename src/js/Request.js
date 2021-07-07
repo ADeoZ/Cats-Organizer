@@ -56,11 +56,10 @@ export default class Request {
         this.callbacks.favouriteRemove(data.id);
         this.callbacks.sideLoad(data.side);
       }
-      // Успешное удаление сообщения из избранного
+      // Ответ с избранными сообщениями
       if (data.event === 'favouritesLoad') {
         this.callbacks.load(data.dB, data.favourites, 0);
-        // this.callbacks.favouriteRemove(data.id);
-        // this.callbacks.sideLoad(data.side);
+        this.callbacks.sideFavourites(data.dB);
       }
     });
 

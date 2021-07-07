@@ -14,6 +14,7 @@ export default class SidePanel {
     this.render = this.render.bind(this);
     this.closeCategory = this.closeCategory.bind(this);
     this.showCategoryItems = this.showCategoryItems.bind(this);
+    this.showFavouritesDescription = this.showFavouritesDescription.bind(this);
 
     // Объект для обработки категорий хранилища
     this.categoryItems = {
@@ -41,14 +42,17 @@ export default class SidePanel {
     }
   }
 
+  // Запрос элементов выбранной категории из базы данных
   requestCategoryItems(type) {
+    // Запрос избранных сообщений для отрисовки в основной ленте
     if (type === 'favourites') {
       this.category = 'favourites';
       this.openCategory(this.categoryItems[type].text);
-      this.request.send('favouritesLoad');
       while (this.messageClass.messagesElement.firstChild) {
         this.messageClass.messagesElement.removeChild(this.messageClass.messagesElement.firstChild);
       }
+      this.messageClass.messages.clear();
+      this.request.send('favouritesLoad');
       return;
     }
 
@@ -67,18 +71,20 @@ export default class SidePanel {
   // Закрываем категорию, возвращаем список
   closeCategory() {
     this.parentElement.querySelector('.chaos_side_subhead').remove();
+    this.parentElement.querySelector('.chaos_side_list').remove();
 
+    // Закрытие ленты избранных сообщений
     if (this.category === 'favourites') {
       while (this.messageClass.messagesElement.firstChild) {
         this.messageClass.messagesElement.removeChild(this.messageClass.messagesElement.firstChild);
       }
+      this.messageClass.messages.clear();
       this.request.send('load');
       this.parentElement.append(this.listElement);
       this.category = '';
       return;
     }
 
-    this.parentElement.querySelector('.chaos_side_list').remove();
     this.parentElement.append(this.listElement);
     this.messageClass.closeSelectMessage();
   }
@@ -92,6 +98,16 @@ export default class SidePanel {
       categoryListElement.append(categoryElement);
       categoryElement.querySelector('.chaos_side_open_select').addEventListener('click', () => this.request.send('select', item.messageId));
     }
+    this.parentElement.append(categoryListElement);
+  }
+
+  // Показ описание категории избранного
+  showFavouritesDescription(data) {
+    const categoryListElement = DOM.createSideCategoryList();
+    const descriptionElement = DOM.createFavouritesDescription(
+      data.length, data[data.length - 1].date, data[0].date,
+    );
+    categoryListElement.append(descriptionElement);
     this.parentElement.append(categoryListElement);
   }
 }

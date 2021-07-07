@@ -65,6 +65,7 @@ export default class Chaos {
       favouriteRemove: this.removeFavouriteMark,
       sideLoad: this.sidePanel.render,
       sideCategory: this.sidePanel.showCategoryItems,
+      sideFavourites: this.sidePanel.showFavouritesDescription,
     };
     this.request.init();
 
