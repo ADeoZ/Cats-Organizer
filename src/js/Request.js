@@ -20,7 +20,7 @@ export default class Request {
       const data = JSON.parse(event.data);
       // Ответ с базой сообщений
       if (data.event === 'database') {
-        this.callbacks.load(data.dB, data.favourites, data.position);
+        this.callbacks.load(data.dB, data.favourites, data.pinnedMessage, data.position);
         this.callbacks.sideLoad(data.side);
       }
       // Успешная отправка текстового сообщения
@@ -60,6 +60,14 @@ export default class Request {
       if (data.event === 'favouritesLoad') {
         this.callbacks.load(data.dB, data.favourites, 0);
         this.callbacks.sideFavourites(data.dB);
+      }
+      // Успешное добавление сообщения в закрепленное
+      if (data.event === 'pin') {
+        this.callbacks.pin(data.id);
+      }
+      // Успешное удаление сообщения из закрепленного
+      if (data.event === 'unpin') {
+        this.callbacks.unpin(data.id);
       }
     });
 

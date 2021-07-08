@@ -50,10 +50,35 @@ export default class DOM {
     return toolsElements;
   }
 
+  // Элемент с меткой для избранного сообщения
   static getFavouriteMark() {
     const favouriteElement = document.createElement('div');
     favouriteElement.classList.add('chaos_message_favourite');
     return favouriteElement;
+  }
+
+  // Элемент с меткой для избранного сообщения
+  static getPinMark() {
+    const pinMarkElement = document.createElement('div');
+    pinMarkElement.classList.add('chaos_message_pin');
+    return pinMarkElement;
+  }
+
+  // Плашка закреплённого сообщения
+  static getPinnedMessage(element) {
+    const pinnedElement = document.createElement('div');
+    pinnedElement.classList.add('chaos_pinned');
+    pinnedElement.innerHTML = `
+      <div class="chaos_pinned_container">
+        ${element.innerHTML}
+      </div>
+      <div class="chaos_pinned_side">
+        <div class="chaos_pinned_title">Закреплённое сообщение <div class="chaos_pinned_close"></div></div>
+        <div class="chaos_pinned_select"></div>
+      </div>
+    `;
+    // pinnedElement.append(element.cloneNode(true));
+    return pinnedElement;
   }
 
   // Элемент текстового сообщения ленты
