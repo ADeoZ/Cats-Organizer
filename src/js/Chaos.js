@@ -4,6 +4,8 @@ import SidePanel from './SidePanel';
 import FileLoader from './FileLoader';
 import MediaLoader from './MediaLoader';
 import Geolocation from './Geolocation';
+import Pin from './Pin';
+import Favourites from './Favourites';
 
 export default class Chaos {
   constructor(element, server) {
@@ -24,10 +26,12 @@ export default class Chaos {
 
     // Заводим вспомогательные классы
     this.request = new Request(this.server);
-    this.sidePanel = new SidePanel(this.parentElement.querySelector('aside.chaos_side'), this, this.request);
-    this.geolocation = new Geolocation(this.parentElement);
+    this.sidePanel = new SidePanel(this.parentElement.querySelector('.chaos_side'), this, this.request);
+    this.geolocation = new Geolocation(this.formElement);
     this.fileLoader = new FileLoader(this.parentElement, this.geolocation, this.request);
-    this.mediaLoader = new MediaLoader(this.parentElement, this.geolocation, this.request);
+    this.mediaLoader = new MediaLoader(this.formElement, this.geolocation, this.request);
+    this.pin = new Pin(this, this.request);
+    this.favourites = new Favourites(this, this.request);
 
     // Привязываем контекст
     this.submitForm = this.submitForm.bind(this);
@@ -46,14 +50,6 @@ export default class Chaos {
     this.closeMessageTools = this.closeMessageTools.bind(this);
     this.deleteMessage = this.deleteMessage.bind(this);
     this.deleteMessageElement = this.deleteMessageElement.bind(this);
-    this.addToFavourites = this.addToFavourites.bind(this);
-    this.removeFromFavourites = this.removeFromFavourites.bind(this);
-    this.showFavouriteMark = this.showFavouriteMark.bind(this);
-    this.removeFavouriteMark = this.removeFavouriteMark.bind(this);
-    this.pinMessage = this.pinMessage.bind(this);
-    this.unpinMessage = this.unpinMessage.bind(this);
-    this.markPinnedMessage = this.markPinnedMessage.bind(this);
-    this.unmarkPinnedMessage = this.unmarkPinnedMessage.bind(this);
   }
 
   init() {
@@ -65,13 +61,14 @@ export default class Chaos {
       file: this.addFile,
       showMessage: this.showSelectMessage,
       delete: this.deleteMessageElement,
-      favourite: this.showFavouriteMark,
-      favouriteRemove: this.removeFavouriteMark,
+      favourite: this.favourites.showFavouriteMark,
+      favouriteRemove: this.favourites.removeFavouriteMark,
       sideLoad: this.sidePanel.render,
       sideCategory: this.sidePanel.showCategoryItems,
       sideFavourites: this.sidePanel.showFavouritesDescription,
-      pin: this.markPinnedMessage,
-      unpin: this.unmarkPinnedMessage,
+      pin: this.pin.markPinnedMessage,
+      pinMessage: this.pin.showPinnedMessage,
+      unpin: this.pin.unmarkPinnedMessage,
     };
     this.request.init();
 
@@ -87,6 +84,13 @@ export default class Chaos {
 
   // Конструктор элемента сообщения в зависимости от типа
   buildMessageElement(type, id, message, geo, date) {
+    // Если уже был отрендерен раньше, то отдать готовый элемент из Map
+    if ([...this.messages.values()].indexOf(id) !== -1) {
+      const messageElement = [...this.messages.entries()]
+        .filter(({ 1: messageId }) => messageId === id).map(([key]) => key);
+      return messageElement[0];
+    }
+
     let messageElement = '';
     switch (type) {
       case 'text': {
@@ -115,6 +119,7 @@ export default class Chaos {
     }
 
     this.messages.set(messageElement, id);
+
     messageElement.addEventListener('mouseenter', this.showMessageDot);
     messageElement.addEventListener('mouseleave', this.removeMessageDot);
 
@@ -122,28 +127,18 @@ export default class Chaos {
   }
 
   // Отрисовка сообщений снизу вверх
-  renderMessages(data, favourites, pinnedMessage, position) {
-    console.log(data);
-    if (pinnedMessage) {
-      const messageElement = this.buildMessageElement(
-        pinnedMessage.type, pinnedMessage.id, pinnedMessage.message,
-        pinnedMessage.geo, pinnedMessage.date,
-      );
-      this.showPinnedMessage(messageElement);
-      this.pinnedMessage = pinnedMessage.id;
-    }
-
+  renderMessages(data, favourites, position) {
     for (const message of data) {
       const messageElement = this.buildMessageElement(
         message.type, message.id, message.message, message.geo, message.date,
       );
 
       if (favourites.indexOf(message.id) !== -1) {
-        this.showFavouriteMark(message.id);
+        this.favourites.showFavouriteMark(message.id);
       }
 
       if (message.pinned) {
-        this.markPinnedMessage(message.id);
+        this.pin.markPinnedMessage(message.id);
       }
 
       this.messagesElement.prepend(messageElement);
@@ -176,6 +171,7 @@ export default class Chaos {
     const messageElement = this.buildMessageElement(
       message.type, message.id, message.message, message.geo, message.date,
     );
+
     const selectContainerElement = DOM.createSelectContainer(message.date);
     const selectCloseElement = selectContainerElement.querySelector('.chaos_select_close');
     selectContainerElement.append(messageElement);
@@ -217,6 +213,9 @@ export default class Chaos {
   addMessage(id, text, geo, date) {
     const messageElement = this.buildMessageElement('text', id, text, geo, date);
     messageElement.classList.add('chaos_messages_message_animation');
+    messageElement.addEventListener('animationend', () => {
+      messageElement.classList.remove('chaos_messages_message_animation');
+    });
     this.messagesElement.append(messageElement);
 
     this.scrollBottom(messageElement);
@@ -266,8 +265,8 @@ export default class Chaos {
     const pinElement = toolsElement.querySelector('.chaos_message_tools_pin');
     const favouriteElement = toolsElement.querySelector('.chaos_message_tools_favourite');
     deleteElement.addEventListener('click', this.deleteMessage);
-    pinElement.addEventListener('click', this.pinMessage);
-    favouriteElement.addEventListener('click', this.addToFavourites);
+    pinElement.addEventListener('click', this.pin.pinMessage);
+    favouriteElement.addEventListener('click', this.favourites.addToFavourites);
   }
 
   // Скрыть дополнительное меню сообщения
@@ -296,6 +295,10 @@ export default class Chaos {
       this.sidePanel.closeCategory();
     }
 
+    if (this.pin.pinnedMessage === messageId) {
+      this.pin.removePinnedMessage();
+    }
+
     const messagesElement = [...this.messages.entries()]
       .filter(({ 1: id }) => id === messageId).map(([key]) => key);
 
@@ -303,102 +306,6 @@ export default class Chaos {
       this.messages.delete(item);
       item.remove();
     });
-  }
-
-  // Запрос на добавление в избранное
-  addToFavourites(event) {
-    const messageId = this.messages.get(event.target.closest('.chaos_messages_message'));
-
-    const isFavouriteMark = event.target.closest('.chaos_messages_message').querySelector('.chaos_message_favourite');
-    if (isFavouriteMark) {
-      return;
-    }
-
-    this.request.send('favourite', messageId);
-    this.closeMessageTools(event);
-  }
-
-  // Запрос на удаление из избранного
-  removeFromFavourites(event) {
-    const messageId = this.messages.get(event.target.closest('.chaos_messages_message'));
-    this.request.send('favouriteRemove', messageId);
-  }
-
-  // Добавляем метку избранного на сообщение
-  showFavouriteMark(messageId) {
-    const messageElement = [...this.messages.entries()]
-      .filter(({ 1: id }) => id === messageId).map(([key]) => key);
-
-    const favouriteElement = DOM.getFavouriteMark();
-    messageElement[0].querySelector('.chaos_message_header').prepend(favouriteElement);
-    favouriteElement.addEventListener('click', this.removeFromFavourites);
-  }
-
-  // Удаляем метку избранного с сообщения
-  removeFavouriteMark(messageId) {
-    const messageElement = [...this.messages.entries()]
-      .filter(({ 1: id }) => id === messageId).map(([key]) => key);
-    messageElement[0].querySelector('.chaos_message_favourite').remove();
-  }
-
-  // Запрос на закрепление сообщения
-  pinMessage(event) {
-    const messageId = this.messages.get(event.target.closest('.chaos_messages_message'));
-
-    const isPinned = event.target.closest('.chaos_messages_message').querySelector('.chaos_message_pin');
-    if (isPinned) {
-      return;
-    }
-
-    this.request.send('pin', messageId);
-    this.closeMessageTools(event);
-  }
-
-  // Запрос на снятие сообщения из закрепленного
-  unpinMessage() {
-    this.request.send('unpin', this.pinnedMessage);
-  }
-
-  // Добавляем метку закреплённого сообщения
-  markPinnedMessage(messageId) {
-    const lastPinnedMessage = this.messagesElement.querySelector('.chaos_message_pin');
-    if (lastPinnedMessage) {
-      lastPinnedMessage.remove();
-      this.parentElement.querySelector('.chaos_pinned').remove();
-    }
-    this.pinnedMessage = messageId;
-
-    const messageElement = [...this.messages.entries()]
-      .filter(({ 1: id }) => id === messageId).map(([key]) => key);
-
-    const pinMarkElement = DOM.getPinMark();
-    messageElement[0].querySelector('.chaos_message_header').prepend(pinMarkElement);
-    pinMarkElement.addEventListener('click', this.unpinMessage);
-    this.showPinnedMessage(messageElement[0]);
-  }
-
-  // Удаляем метку закреплённого с сообщения
-  unmarkPinnedMessage(messageId) {
-    this.pinnedMessage = '';
-    const messageElement = [...this.messages.entries()]
-      .filter(({ 1: id }) => id === messageId).map(([key]) => key);
-    messageElement[0].querySelector('.chaos_message_pin').remove();
-    this.parentElement.querySelector('.chaos_pinned').remove();
-  }
-
-  // Прикрепляем плашку с закреплённым сообщением
-  showPinnedMessage(messageElement) {
-    const hasPinnedMessage = this.messagesElement.querySelector('.chaos_pinned');
-    if (hasPinnedMessage) {
-      hasPinnedMessage.remove();
-    }
-
-    const pinnedElement = DOM.getPinnedMessage(messageElement.querySelector('.chaos_message_body'));
-    this.messagesElement.append(pinnedElement);
-    const closeElement = pinnedElement.querySelector('.chaos_pinned_close');
-    closeElement.addEventListener('click', this.unpinMessage);
-    const selectElement = pinnedElement.querySelector('.chaos_pinned_select');
-    selectElement.addEventListener('click', () => this.request.send('select', this.pinnedMessage));
   }
 
   // Прокрутка сообщений вниз по загрузке их содержимого

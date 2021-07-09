@@ -2,8 +2,7 @@ import DOM from './DOM';
 
 export default class Geolocation {
   constructor(element) {
-    this.parentElement = element;
-    this.formElement = this.parentElement.querySelector('.chaos_form');
+    this.formElement = element;
     this.coords = '';
     this.geoElement = '';
 

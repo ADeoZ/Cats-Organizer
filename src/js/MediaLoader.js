@@ -3,8 +3,7 @@ import DOM from './DOM';
 export default class MediaLoader {
   constructor(element, geoClass, requestClass) {
     // Собираем элементы
-    this.parentElement = element;
-    this.formElement = this.parentElement.querySelector('.chaos_form');
+    this.formElement = element;
     this.inputElement = this.formElement.querySelector('.chaos_form_input');
     this.clipElement = this.formElement.querySelector('.chaos_form_clip');
 
