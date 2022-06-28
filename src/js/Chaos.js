@@ -37,6 +37,8 @@ export default class Chaos {
     this.submitForm = this.submitForm.bind(this);
     this.showAddForm = this.showAddForm.bind(this);
     this.removeError = this.removeError.bind(this);
+    this.connectionPending = this.connectionPending.bind(this);
+    this.connectionSuccess = this.connectionSuccess.bind(this);
     this.connectionError = this.connectionError.bind(this);
     this.addMessage = this.addMessage.bind(this);
     this.addFile = this.addFile.bind(this);
@@ -55,6 +57,8 @@ export default class Chaos {
   init() {
     // Соединяемся с WebSocket
     this.request.callbacks = {
+      pending: this.connectionPending,
+      success: this.connectionSuccess,
       error: this.connectionError,
       load: this.renderMessages,
       message: this.addMessage,
@@ -341,6 +345,19 @@ export default class Chaos {
   removeError() {
     this.inputElement.classList.remove('chaos_form_invalid');
     this.inputElement.removeEventListener('keydown', this.removeError);
+  }
+
+  // Соединение с сервером
+  connectionPending() {
+    this.connectionPendingElement = DOM.createPendingConnectionElement();
+    this.parentElement.querySelector('.chaos_container').append(this.connectionPendingElement);
+  }
+
+  // Соединение установлено
+  connectionSuccess() {
+    if (this.connectionPendingElement) {
+      this.connectionPendingElement.remove();
+    }
   }
 
   // Ошибка соединения

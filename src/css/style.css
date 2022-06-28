@@ -53,9 +53,9 @@ h1.title {
     border-right: 1px solid darkslategray;
 }
 
-/* ОШИБКИ */
+/* СОЕДИНЕНИЕ */
 
-.chaos_connection_error {
+.chaos_connection_pending, .chaos_connection_error {
     position: absolute;
     display: flex;
     justify-content: center;
@@ -72,6 +72,22 @@ h1.title {
     content: 'Ошибка. Проверьте соединение с сервером.';
     font-size: 22px;
     font-weight: bold;
+}
+
+.chaos_connection_pending::after {
+    content: 'Ожидание ответа сервера...';
+    font-size: 22px;
+    font-weight: bold;
+    animation: blink 0.5s alternate-reverse infinite ease-in-out;
+}
+
+@keyframes blink {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 /* ФОРМА СООБЩЕНИЯ */

@@ -7,7 +7,9 @@ export default class Request {
     // Первичное создание объектов
     this.data = { event: 'load' };
     this.callbacks = {
-      error: () => { throw Error('Ошибка соединения'); },
+      error: () => {
+        throw Error('Ошибка соединения');
+      },
     };
 
     // Привязываем контекст
@@ -17,7 +19,7 @@ export default class Request {
 
   init() {
     this.ws = new WebSocket(this.wsServer);
-
+    this.callbacks.pending();
     // При соединении запрашиваем первичные данные
     this.ws.addEventListener('open', this.onOpen);
 
@@ -29,6 +31,7 @@ export default class Request {
 
   // Открытие соединения
   onOpen() {
+    this.callbacks.success();
     this.ws.send(JSON.stringify(this.data));
   }
 
@@ -39,11 +42,17 @@ export default class Request {
     if (data.event === 'database') {
       this.callbacks.load(data.dB, data.favourites, data.position);
       if (data.pinnedMessage) {
-        this.callbacks.pinMessage(data.pinnedMessage.type, data.pinnedMessage.id,
-          data.pinnedMessage.message, data.pinnedMessage.geo, data.pinnedMessage.date);
+        this.callbacks.pinMessage(
+          data.pinnedMessage.type,
+          data.pinnedMessage.id,
+          data.pinnedMessage.message,
+          data.pinnedMessage.geo,
+          data.pinnedMessage.date,
+        );
       }
       this.callbacks.sideLoad(data.side);
     }
+
     // Успешная отправка текстового сообщения
     if (data.event === 'text') {
       this.callbacks.message(data.id, data.message, data.geo, data.date);
@@ -51,7 +60,13 @@ export default class Request {
     }
     // Успешная отправка файла
     if (data.event === 'file') {
-      this.callbacks.file(data.type, data.id, data.message, data.geo, data.date);
+      this.callbacks.file(
+        data.type,
+        data.id,
+        data.message,
+        data.geo,
+        data.date,
+      );
       this.callbacks.sideLoad(data.side);
     }
     // Ответ с базой по категории хранилища
@@ -81,16 +96,26 @@ export default class Request {
     if (data.event === 'favouritesLoad') {
       this.callbacks.load(data.dB, data.favourites, 0);
       if (data.pinnedMessage) {
-        this.callbacks.pinMessage(data.pinnedMessage.type, data.pinnedMessage.id,
-          data.pinnedMessage.message, data.pinnedMessage.geo, data.pinnedMessage.date);
+        this.callbacks.pinMessage(
+          data.pinnedMessage.type,
+          data.pinnedMessage.id,
+          data.pinnedMessage.message,
+          data.pinnedMessage.geo,
+          data.pinnedMessage.date,
+        );
       }
       this.callbacks.sideFavourites(data.dB);
     }
     // Успешное добавление сообщения в закрепленное
     if (data.event === 'pin') {
       this.callbacks.pin(data.pinnedMessage.id);
-      this.callbacks.pinMessage(data.pinnedMessage.type, data.pinnedMessage.id,
-        data.pinnedMessage.message, data.pinnedMessage.geo, data.pinnedMessage.date);
+      this.callbacks.pinMessage(
+        data.pinnedMessage.type,
+        data.pinnedMessage.id,
+        data.pinnedMessage.message,
+        data.pinnedMessage.geo,
+        data.pinnedMessage.date,
+      );
     }
     // Успешное удаление сообщения из закрепленного
     if (data.event === 'unpin') {

@@ -134,6 +134,13 @@ export default class DOM {
     return selectContainerElement;
   }
 
+  // Элемент отображения процесса соединения c сервером
+  static createPendingConnectionElement() {
+    const connectionPendingElement = document.createElement('div');
+    connectionPendingElement.classList.add('chaos_connection_pending');
+    return connectionPendingElement;
+  }
+
   // Элемент отображения ошибки соединения
   static createErrorConnectionElement() {
     const connectionErrorElement = document.createElement('div');
